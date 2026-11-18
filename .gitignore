@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.tsbuildinfo
+*.gguf
+*.log
+.firebase/
+benchmark/
+.local-qwen/

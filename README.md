@@ -95,4 +95,3 @@ Before submission: make the repository public, configure and verify Firebase, pu
 ## Stack and license
 
 React, Vite, TypeScript, Firebase JS SDK 13.4.0, Firebase AI Logic and Firebase App Check. Application code: MIT. llama.cpp and Qwen retain their own upstream licenses.
-
