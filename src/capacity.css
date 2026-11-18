@@ -1,0 +1,7 @@
+.capacity-report{margin-top:12px;padding:12px;background:#f5f7ef;border:1px solid #e2e7d8;border-radius:7px}
+.capacity-report dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 10px;margin:0}
+.capacity-report dt{font-size:9px;color:#919b83;margin-bottom:4px}
+.capacity-report dd{font-size:11px;color:#56664a;margin:0;overflow-wrap:anywhere}
+.capacity-report p{font-size:9px;line-height:1.7;color:#929d85;margin:12px 0 0;border-top:1px solid #e4e9dc;padding-top:9px}
+.routing-note{font-size:10px;line-height:1.7;color:#7b8d70;background:#edf2e6;border-radius:6px;padding:9px 11px;margin:0 0 12px}
+@media(max-width:390px){.capacity-report dl{grid-template-columns:repeat(2,minmax(0,1fr))}}

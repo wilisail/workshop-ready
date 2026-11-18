@@ -11,6 +11,7 @@ The application supports Firebase AI Logic hybrid inference, with **Cloud** sele
 - Chrome local inference is **implemented but unverified**. The current 8 GB development laptop is not eligible for Chrome's managed model.
 - A separate CPU-only Qwen learning experiment **was measured successfully** in Linux at about **573–575 MiB peak process RAM**. That is not a Chrome/Gemini Nano benchmark and does not prove Windows performance.
 - The sample preview is explicitly labelled **Sample preview — no AI request**. It is not a simulated Firebase response.
+- A browser capacity reader and guarded inference routing are implemented. The cross-platform terminal capacity reader was run successfully in Linux; native Windows reporting and the Windows process watchdog remain unverified.
 
 ## Run the application
 
@@ -51,13 +52,18 @@ The public build always needs a production App Check provider. Do not publish de
 
 | UI choice | Firebase mode | Behavior |
 | --- | --- | --- |
-| Cloud — start here | `ONLY_IN_CLOUD` | Send the note to the configured cloud model; do not initialize or download the local model. |
-| Prefer device, allow cloud fallback | `PREFER_ON_DEVICE` | Initialize the device model after a Generate click; allow the SDK's cloud fallback if local inference is unavailable or not ready. |
-| Device only — stay offline | `ONLY_ON_DEVICE` | Await a prepared local model; fail visibly if it is unavailable. No cloud fallback. |
+| Cloud only — start here | `ONLY_IN_CLOUD` | Send the note to the configured cloud model; do not initialize or download the local model. |
+| Prefer cloud, allow device fallback | `PREFER_IN_CLOUD` when local is ready | Prefer cloud. Prepare an already-downloaded local model as fallback; otherwise use cloud-only without starting a download. |
+| Prefer device, allow cloud fallback | `PREFER_ON_DEVICE` when local is ready | Query readiness on every request. If the model is unavailable or not ready, route straight to cloud without starting a model download. |
+| Device only — no cloud fallback | `ONLY_ON_DEVICE` | Await a prepared local model; fail visibly if it is unavailable. No cloud fallback. |
 
 The displayed source is derived from `response.inferenceSource`, not inferred from the requested mode. Firebase SDK v13.4.0 enum values are `on_device` and `in_cloud`. Unknown sources are rejected, and local-only mode rejects a cloud response.
 
 **Check device** queries browser availability without starting a model download. A compatible device may still need to download a model before it can generate locally.
+
+The reader also displays browser-estimated RAM, logical processors, site storage use/quota and a connection hint. These are limited browser readings: free system RAM is deliberately shown as **Not exposed**. A browser permission checkbox cannot reveal an OS API that is not provided. The report is computed locally and is not added to AI prompts or sent to Firebase.
+
+See [capacity readers and routing](docs/capacity-routing.md) for owner-run terminal commands, available-memory percentages and the Windows Qwen process guard. Browser readiness is not a guarantee of spare physical RAM.
 
 ## Offline behavior
 

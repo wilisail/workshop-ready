@@ -1,4 +1,4 @@
-export type InferenceModeChoice = 'cloud' | 'hybrid' | 'local';
+export type InferenceModeChoice = 'cloud' | 'cloud-first' | 'hybrid' | 'local';
 export type InferenceSource = 'cloud' | 'device';
 export interface OrganizedNotes {
   ready: string[];
@@ -10,6 +10,7 @@ export interface NoteResult extends OrganizedNotes {
   elapsedMs: number;
   createdAt: string;
   input: string;
+  routingNote?: string;
 }
 
 export const MAX_NOTE_LENGTH = 12000;

@@ -1,8 +1,18 @@
-param([string]$Note = 'Tables and chairs arrived. Extension cables are missing. Rina will confirm room access by 4 pm. Putri needs to print 20 handouts.')
+param(
+    [string]$Note = 'Tables and chairs arrived. Extension cables are missing. Rina will confirm room access by 4 pm. Putri needs to print 20 handouts.',
+    [ValidateRange(768,4096)][int]$MaxProcessMiB = 1024,
+    [ValidateRange(256,4096)][int]$ReserveMiB = 512,
+    [ValidateRange(15,300)][int]$TimeoutSeconds = 120
+)
 $ErrorActionPreference = 'Stop'
-$AvailableMiB = (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024
-Write-Host ('Available RAM: {0:N0} MiB' -f $AvailableMiB)
-if ($AvailableMiB -lt 1024) { throw 'Free at least 1024 MiB of RAM for this small-model exercise, then retry. Save work and close unused applications.' }
+function Assert-StartCapacity {
+    $Snapshot = & (Join-Path $PSScriptRoot 'get-device-capacity.ps1') -AsJson -ProcessBudgetMiB $MaxProcessMiB -ReserveMiB $ReserveMiB | ConvertFrom-Json
+    Write-Host ('Available RAM: {0:N0} MiB ({1}% of usable RAM)' -f $Snapshot.memory.availableMiB, $Snapshot.memory.availablePercent)
+    if (-not $Snapshot.qwenGuard.meetsMemoryStartCheck) {
+        throw ('Local start blocked: {0} MiB available; this guard asks for {1} MiB including reserve. Keep the note and use the web app''s Cloud mode after Firebase is connected. No note was uploaded.' -f $Snapshot.memory.availableMiB, $Snapshot.qwenGuard.minimumAvailableMiB)
+    }
+}
+Assert-StartCapacity
 $WorkFolder = Join-Path (Split-Path $PSScriptRoot -Parent) '.local-qwen'
 New-Item -ItemType Directory -Force -Path $WorkFolder | Out-Null
 $Archive = Join-Path $WorkFolder 'llama-b12498-bin-win-cpu-x64.zip'
@@ -26,14 +36,45 @@ Example JSON: {"ready":["Coffee delivered"],"blocked":["Cups missing"],"nextActi
 NOTES: $Note<|im_end|>
 <|im_start|>assistant
 "@
-$PromptFile = Join-Path $WorkFolder 'prompt.txt'
+$RunId = [Guid]::NewGuid().ToString('N')
+$PromptFile = Join-Path $WorkFolder ($RunId + '-prompt.txt')
+$OutputFile = Join-Path $WorkFolder ($RunId + '-output.txt')
+$ErrorFile = Join-Path $WorkFolder ($RunId + '-error.txt')
 [System.IO.File]::WriteAllText($PromptFile, $Prompt, (New-Object System.Text.UTF8Encoding($false)))
 $Watch = [System.Diagnostics.Stopwatch]::StartNew()
+$ModelProcess = $null
+$RunLock = $null
+$PeakMiB = 0
 try {
-    & $Executable.FullName -m $Model --device none -ngl 0 -t 2 -c 1024 -b 64 -ub 64 -n 160 --temp 0 --seed 1 --no-conversation --no-display-prompt -f $PromptFile
-    if ($LASTEXITCODE -ne 0) { throw "Model runtime exited with code $LASTEXITCODE" }
+    # Exclusive lock: at most one model launched by this script in this checkout.
+    $RunLock = [System.IO.File]::Open((Join-Path $WorkFolder 'runtime.lock'), 'OpenOrCreate', 'ReadWrite', 'None')
+    Assert-StartCapacity # Downloads may have taken time; take a fresh reading.
+    $Arguments = '-m "{0}" --device none -ngl 0 -t 2 -c 1024 -b 64 -ub 64 -n 160 --temp 0 --seed 1 --no-conversation --no-display-prompt -f "{1}"' -f $Model, $PromptFile
+    $Watch.Restart()
+    $ModelProcess = Start-Process -FilePath $Executable.FullName -ArgumentList $Arguments -NoNewWindow -PassThru -RedirectStandardOutput $OutputFile -RedirectStandardError $ErrorFile
+    while (-not $ModelProcess.HasExited) {
+        $ModelProcess.Refresh()
+        if ($ModelProcess.HasExited) { break }
+        $WorkingMiB = $ModelProcess.WorkingSet64 / 1MB
+        $PeakMiB = [math]::Max($PeakMiB, $WorkingMiB)
+        $AvailableMiB = (Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024
+        if ($WorkingMiB -gt $MaxProcessMiB) { throw ('Local model exceeded the {0} MiB process budget.' -f $MaxProcessMiB) }
+        if ($AvailableMiB -lt $ReserveMiB) { throw ('Available system RAM fell below the {0} MiB reserve.' -f $ReserveMiB) }
+        if ($Watch.Elapsed.TotalSeconds -gt $TimeoutSeconds) { throw ('Local model exceeded the {0}-second time limit.' -f $TimeoutSeconds) }
+        Start-Sleep -Milliseconds 400
+    }
+    $ModelProcess.WaitForExit()
+    if (Test-Path $OutputFile) { Get-Content -Raw $OutputFile }
+    if ($ModelProcess.ExitCode -ne 0) {
+        if (Test-Path $ErrorFile) { Get-Content -Raw $ErrorFile | Write-Host }
+        throw ('Model runtime exited with code {0}' -f $ModelProcess.ExitCode)
+    }
 } finally {
+    if ($ModelProcess -and -not $ModelProcess.HasExited) { Stop-Process -Id $ModelProcess.Id -Force -ErrorAction SilentlyContinue }
+    if ($RunLock) { $RunLock.Dispose() }
     $Watch.Stop()
-    Remove-Item -Path $PromptFile -ErrorAction SilentlyContinue
+    Remove-Item -Path $PromptFile,$OutputFile,$ErrorFile -ErrorAction SilentlyContinue
     Write-Host ('Elapsed: {0:N2} seconds' -f $Watch.Elapsed.TotalSeconds)
+    if ($ModelProcess) { Write-Host ('Observed process peak: {0:N0} MiB (polling can miss short peaks)' -f $PeakMiB) }
+    else { Write-Host 'No model process was started.' }
 }

@@ -1,18 +1,9 @@
 import { buildPrompt, parseOrganizedNotes, resolveSource } from './notes.ts';
 import type { InferenceModeChoice, NoteResult } from './notes.ts';
 import type { FirebaseSettings } from './storage.ts';
+import { checkLocalAvailability, planRoute } from './capacity.ts';
 
 const checkedApps = new Set<string>();
-export type LocalAvailability = 'available' | 'downloadable' | 'downloading' | 'unavailable' | 'unknown';
-
-export async function checkLocalAvailability(): Promise<LocalAvailability> {
-  const api = (globalThis as unknown as { LanguageModel?: { availability(options: unknown): Promise<string> } }).LanguageModel;
-  if (!api?.availability) return 'unavailable';
-  try {
-    const value = await api.availability({ expectedInputs: [{ type: 'text', languages: ['en'] }], expectedOutputs: [{ type: 'text', languages: ['en'] }] });
-    return ['available', 'downloadable', 'downloading', 'unavailable'].includes(value) ? value as LocalAvailability : 'unknown';
-  } catch { return 'unknown'; }
-}
 
 export async function organizeNotes(
   note: string,
@@ -22,11 +13,13 @@ export async function organizeNotes(
   onProgress: (message: string) => void,
 ): Promise<NoteResult> {
   const prompt = buildPrompt(note);
+  const availability = mode === 'cloud' ? 'unknown' : await checkLocalAvailability();
+  const route = planRoute(mode, availability, navigator.onLine);
+  signal.throwIfAborted();
   const debug = import.meta.env.DEV && import.meta.env.VITE_APPCHECK_DEBUG === 'true';
   if (!settings.siteKey.trim() && !debug) throw new Error('Add your App Check reCAPTCHA Enterprise site key in Firebase settings.');
-  if (mode === 'cloud' && !navigator.onLine) throw new Error('You are offline. Your draft is saved. Reconnect for cloud processing, or use a prepared compatible device for local inference.');
   const start = performance.now();
-  onProgress(mode === 'cloud' ? 'Connecting to Firebase…' : 'Checking local inference…');
+  onProgress(route.explanation);
   const [appSDK, appCheckSDK, aiSDK] = await Promise.all([import('firebase/app'), import('firebase/app-check'), import('firebase/ai')]);
   signal.throwIfAborted();
   const name = `workshop-ready-${settings.config.projectId}`;
@@ -40,8 +33,8 @@ export async function organizeNotes(
     checkedApps.add(name);
   }
   const ai = aiSDK.getAI(app, { backend: new aiSDK.GoogleAIBackend() });
-  const model = aiSDK.getGenerativeModel(ai, {
-    mode: mode === 'cloud' ? aiSDK.InferenceMode.ONLY_IN_CLOUD : mode === 'local' ? aiSDK.InferenceMode.ONLY_ON_DEVICE : aiSDK.InferenceMode.PREFER_ON_DEVICE,
+  const createModel = (chosen: InferenceModeChoice) => aiSDK.getGenerativeModel(ai, {
+    mode: chosen === 'cloud' ? aiSDK.InferenceMode.ONLY_IN_CLOUD : chosen === 'cloud-first' ? aiSDK.InferenceMode.PREFER_IN_CLOUD : chosen === 'local' ? aiSDK.InferenceMode.ONLY_ON_DEVICE : aiSDK.InferenceMode.PREFER_ON_DEVICE,
     inCloudParams: {
       model: settings.model,
       generationConfig: {
@@ -59,17 +52,25 @@ export async function organizeNotes(
     },
     onDeviceParams: { createOptions: { expectedInputs: [{ type: 'text', languages: ['en'] }], expectedOutputs: [{ type: 'text', languages: ['en'] }] } },
   }, { timeout: 45000 });
+  let model = createModel(route.mode);
+  let routingNote = route.explanation;
 
-  if (mode !== 'cloud') {
-    // Only an explicit Generate click in a local-capable mode can initiate a model download.
-    const preparing = model.initializeDeviceModel(progress => {
-      if (!signal.aborted) onProgress(`Preparing local model: ${Math.round(progress * 100)}%`);
-    });
-    if (mode === 'local') await preparing;
-    else void preparing.catch(() => { /* Firebase performs the selected cloud fallback. */ });
+  if (route.prepareDevice) {
+    // Preference modes only prepare a model already reported ready. Local-only is the explicit download choice.
+    try {
+      await model.initializeDeviceModel(progress => {
+        if (!signal.aborted) onProgress(`Preparing local model: ${Math.round(progress * 100)}%`);
+      });
+    } catch (error) {
+      signal.throwIfAborted();
+      if (mode === 'local' || !navigator.onLine) throw error;
+      model = createModel('cloud');
+      routingNote = 'Local preparation failed after the readiness check. The selected preference allows cloud fallback.';
+      onProgress(routingNote);
+    }
   }
   signal.throwIfAborted();
-  onProgress(mode === 'cloud' ? 'Organizing in the cloud…' : 'Organizing your notes…');
+  onProgress(route.mode === 'cloud' ? 'Organizing in the cloud…' : 'Organizing your notes…');
   const { response } = await model.generateContent(prompt, { signal });
   signal.throwIfAborted();
   return {
@@ -78,6 +79,7 @@ export async function organizeNotes(
     elapsedMs: performance.now() - start,
     createdAt: new Date().toISOString(),
     input: note,
+    routingNote,
   };
 }
 
@@ -91,4 +93,3 @@ export function friendlyError(error: unknown): string {
   }
   return 'Something interrupted the request. Your draft is safe; try again.';
 }
-

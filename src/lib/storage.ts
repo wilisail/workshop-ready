@@ -11,7 +11,7 @@ export interface FirebaseSettings {
 export function readDraft(): { note: string; mode: InferenceModeChoice } {
   try {
     const data = JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}');
-    return { note: typeof data.note === 'string' ? data.note : '', mode: ['cloud', 'hybrid', 'local'].includes(data.mode) ? data.mode : 'cloud' };
+    return { note: typeof data.note === 'string' ? data.note : '', mode: ['cloud', 'cloud-first', 'hybrid', 'local'].includes(data.mode) ? data.mode : 'cloud' };
   } catch { return { note: '', mode: 'cloud' }; }
 }
 

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { checkLocalAvailability, friendlyError, organizeNotes } from './lib/ai.ts';
-import type { LocalAvailability } from './lib/ai.ts';
+import { friendlyError, organizeNotes } from './lib/ai.ts';
+import { checkLocalAvailability, formatCapacityBytes, planRoute, readBrowserCapacity } from './lib/capacity.ts';
+import type { BrowserCapacity, LocalAvailability } from './lib/capacity.ts';
 import { MAX_NOTE_LENGTH, SAMPLE_NOTE, SAMPLE_RESULT, resultAsText } from './lib/notes.ts';
 import type { InferenceModeChoice, NoteResult } from './lib/notes.ts';
 import { parseFirebaseConfig, readDraft, readSettings, saveDraft, storeSettings } from './lib/storage.ts';
@@ -77,6 +78,7 @@ function App() {
   const [copied, setCopied] = useState(false);
   const [online, setOnline] = useState(navigator.onLine);
   const [localStatus, setLocalStatus] = useState<LocalAvailability | 'unchecked'>('unchecked');
+  const [capacity, setCapacity] = useState<BrowserCapacity | null>(null);
   const [checking, setChecking] = useState(false);
   const [cacheFailed, setCacheFailed] = useState(false);
   const controller = useRef<AbortController | null>(null);
@@ -92,7 +94,20 @@ function App() {
   async function run() {
     setError('');
     if (!note.trim()) { setError('Add your workshop notes, or try the example first.'); return; }
-    if (!settings) { setSettingsOpen(true); return; }
+    if (!settings) {
+      if (mode === 'local') {
+        try {
+          const readiness = await checkLocalAvailability();
+          setLocalStatus(readiness);
+          planRoute(mode, readiness, navigator.onLine);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'The local model is unavailable. No cloud request was made.');
+          return;
+        }
+      }
+      setSettingsOpen(true);
+      return;
+    }
     const id = ++requestId.current;
     const active = new AbortController(); controller.current = active;
     setBusy(true);
@@ -112,7 +127,12 @@ function App() {
     setNote(SAMPLE_NOTE); setError('');
     setResult({ ...SAMPLE_RESULT, source: 'sample', elapsedMs: 0, createdAt: new Date().toISOString(), input: SAMPLE_NOTE });
   }
-  async function checkDevice() { setChecking(true); setLocalStatus(await checkLocalAvailability()); setChecking(false); }
+  async function checkDevice() {
+    setChecking(true);
+    try { const report = await readBrowserCapacity(); setCapacity(report); setLocalStatus(report.localModel); }
+    catch { setError('Browser capacity could not be read. Cloud mode remains available after Firebase setup.'); }
+    finally { setChecking(false); }
+  }
   async function copy() {
     if (!result) return;
     try { await navigator.clipboard.writeText(resultAsText(result)); setCopied(true); window.setTimeout(() => setCopied(false), 2000); }
@@ -137,7 +157,29 @@ function App() {
           <div className="panel-heading"><div><span className="step-number">01</span><h2 id="notes-heading">Your field notes</h2></div><button className="example-button" onClick={loadExample} disabled={busy}><Icon name="spark" size={15}/> Try an example</button></div>
           <p className="panel-description">Messy is fine. Start with what you know.</p>
           <div className="textarea-wrap"><label className="sr-only" htmlFor="note-input">Workshop notes</label><textarea id="note-input" className="note-input" placeholder={'What arrived? What’s missing?\nWho is doing what, and by when?\n\nPaste your notes here…'} value={note} maxLength={MAX_NOTE_LENGTH} onChange={event => setNote(event.target.value)} disabled={busy}/><div className="textarea-footer"><span className={saved ? '' : 'save-failed'}><Icon name={saved ? 'check' : 'alert'} size={13}/>{saved ? 'Draft saved on this browser' : 'Draft could not be saved'}</span><span>{note.length.toLocaleString()} / 12,000</span></div></div>
-          <div className="processing"><div className="processing-title"><span>Processing</span><span className="recommended">YOU CHOOSE</span></div><label className="sr-only" htmlFor="mode-select">Processing mode</label><div className="mode-select-wrap"><Icon name={mode === 'cloud' ? 'cloud' : 'device'} size={19}/><select id="mode-select" value={mode} disabled={busy} onChange={event => setMode(event.target.value as InferenceModeChoice)}><option value="cloud">Cloud — start here</option><option value="hybrid">Prefer device, allow cloud fallback</option><option value="local">Device only — stay offline</option></select></div><p className="mode-description">{mode === 'cloud' ? 'Works on lighter laptops. Notes are sent to Firebase when you organize them.' : mode === 'hybrid' ? 'Uses the local model when ready; otherwise sends the note to Firebase’s cloud model. May start a model download.' : 'Uses a prepared local model on a compatible device. It will never fall back to cloud.'}</p><div className="device-check"><span><i className={localStatus === 'available' ? 'ready-dot' : ''}/>{LOCAL_LABELS[localStatus]}</span><button type="button" disabled={checking || busy} onClick={checkDevice}>{checking ? 'Checking…' : 'Check device'}</button></div></div>
+          <div className="processing">
+            <div className="processing-title"><span>Processing</span><span className="recommended">YOU CHOOSE</span></div>
+            <label className="sr-only" htmlFor="mode-select">Processing mode</label>
+            <div className="mode-select-wrap"><Icon name={mode === 'cloud' || mode === 'cloud-first' ? 'cloud' : 'device'} size={19}/><select id="mode-select" value={mode} disabled={busy} onChange={event => setMode(event.target.value as InferenceModeChoice)}>
+              <option value="cloud">Cloud only — start here</option>
+              <option value="cloud-first">Prefer cloud, allow device fallback</option>
+              <option value="hybrid">Prefer device, allow cloud fallback</option>
+              <option value="local">Device only — no cloud fallback</option>
+            </select></div>
+            <p className="mode-description">{mode === 'cloud' ? 'Works on lighter laptops. Notes are sent to Firebase when you organize them.' : mode === 'cloud-first' ? 'Prefers the cloud model. A downloaded, compatible local model can act as a fallback.' : mode === 'hybrid' ? 'Checks local readiness on every request. Uses cloud immediately if the local model is not ready.' : 'Keeps processing on a compatible device. Your explicit Generate click may prepare or download its local model.'}</p>
+            <div className="device-check"><span><i className={localStatus === 'available' ? 'ready-dot' : ''}/>{LOCAL_LABELS[localStatus]}</span><button type="button" disabled={checking || busy} onClick={checkDevice}>{checking ? 'Checking…' : capacity ? 'Refresh reading' : 'Check device'}</button></div>
+            {capacity && <div className="capacity-report" aria-label="Browser capacity report">
+              <dl>
+                <div><dt>RAM estimate</dt><dd>{capacity.approximateMemoryGiB === null ? 'Not exposed' : `≈ ${capacity.approximateMemoryGiB} GiB`}</dd></div>
+                <div><dt>Browser threads</dt><dd>{capacity.logicalProcessors ?? 'Not exposed'}</dd></div>
+                <div><dt>Free system RAM</dt><dd>Not exposed</dd></div>
+                <div><dt>Site storage used</dt><dd>{formatCapacityBytes(capacity.storageUsageBytes)}</dd></div>
+                <div><dt>Site storage quota</dt><dd>{formatCapacityBytes(capacity.storageQuotaBytes)}</dd></div>
+                <div><dt>Connection hint</dt><dd>{capacity.onlineHint ? 'Online' : 'Offline'}</dd></div>
+              </dl>
+              <p>Read locally on your click. Browser values are approximate; site quota is not free disk space. Exact available RAM needs the optional owner-run terminal reader.</p>
+            </div>}
+          </div>
           <div className="editor-actions">{busy ? <button className="primary-button stop-button" onClick={stop}><span className="spinner"/> Stop waiting</button> : <button className="primary-button organize-button" onClick={run}>Organize my notes <Icon name="arrow" size={19}/></button>}<button className="clear-button" disabled={busy || !note} onClick={() => { setNote(''); setResult(null); setError(''); }}>Clear</button></div>
           <div className="live-status" aria-live="polite">{busy ? progress : !settings ? 'Connect Firebase to generate. The example is available now.' : 'Firebase configured. Generate a note to verify the connection.'}</div>
           {error && <div className="error-message" role="alert"><Icon name="alert" size={17}/><span>{error}</span></div>}
@@ -147,6 +189,7 @@ function App() {
           <div className="panel-heading"><div><span className="step-number">02</span><h2 id="results-heading">A little more clarity</h2></div>{result && <div className="result-tools"><button className="icon-button" onClick={copy} aria-label={copied ? 'Copied results' : 'Copy results'} title="Copy results"><Icon name={copied ? 'check' : 'copy'} size={17}/></button><button className="icon-button" onClick={download} aria-label="Download results" title="Download results"><Icon name="download" size={17}/></button></div>}</div>
           <div className="results-summary">{result ? <><span className={`source-badge source-${result.source}`}><Icon name={result.source === 'cloud' ? 'cloud' : result.source === 'device' ? 'device' : 'spark'} size={13}/>{result.source === 'sample' ? 'Sample preview · no AI request' : result.source === 'device' ? 'Processed on device' : 'Processed in cloud'}</span>{result.source !== 'sample' && <span className="elapsed">{(result.elapsedMs / 1000).toFixed(1)}s</span>}</> : <span>Your organized notes will appear here.</span>}</div>
           {stale && <div className="stale-message">Your note has changed. Organize it again to update these sections.</div>}
+          {result?.routingNote && <p className="routing-note">{result.routingNote}</p>}
           <div className={`result-cards ${busy ? 'is-loading' : ''}`} aria-busy={busy}>{sections.map(section => <article key={section.key} className={`result-card card-${section.key}`}><div className="card-header"><span className="card-icon"><Icon name={section.icon} size={18}/></span><div><h3>{section.title}</h3><p>{section.subtitle}</p></div><span className="count-badge">{result ? result[section.key].length : '—'}</span></div>{result ? result[section.key].length ? <ul>{result[section.key].map((item, index) => <li key={`${section.key}-${index}`}><span className="list-dot"/>{item}</li>)}</ul> : <p className="empty-section">Nothing stated in this note.</p> : <div className="empty-card"><p>{section.empty}</p><span className="skeleton-line"/><span className="skeleton-line short"/></div>}</article>)}</div>
           <div className="review-note"><Icon name="note" size={16}/><p>A starting point, not a final decision. Check names, deadlines and details before acting.</p></div>
         </section>
