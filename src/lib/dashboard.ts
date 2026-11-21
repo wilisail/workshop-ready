@@ -126,7 +126,7 @@ export function shortDate(date: string, includeYear = false): string {
 export function locationName(id: string): string { return LOCATIONS.find(l => l.id === id)?.name || id; }
 export function csvCell(value: string | number | null): string {
   const string = value === null ? '' : String(value);
-  return '"' + (/^[=+@\-\t\r]/.test(string) ? "'" + string : string).replaceAll('"', '""') + '"';
+  return '"' + (/^\s*[=+@-]|^[\t\r\n]/.test(string) ? "'" + string : string).replaceAll('"', '""') + '"';
 }
 export function observationCsv(observations: Observation[]): string {
   const rows: (string | number | null)[][] = [['dataset', 'provenance', 'observation_id', 'location', 'container', 'captured_at', 'fixture_estimate_no_ai', 'reviewed_count', 'status']];

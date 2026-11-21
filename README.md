@@ -2,7 +2,7 @@
 
 A cloud-first research prototype for reviewing release-container observations, exploring case trends and preparing follow-ups.
 
-The repository remains `wilisail/workshop-ready`. **Step 2 is implemented:** a working dashboard interface using fictional locations, synthetic case records and bead illustrations. Live image AI, evaluated ML and generated deployment recommendations are still pending.
+The repository remains `wilisail/workshop-ready`. **Step 3 implementation is ready:** saved image observations, guarded Firebase image-counting adapters and append-only analysis/review history are implemented. Your real-photo tests and live Firebase verification are deferred. Evaluated ML and generated planning recommendations remain future work.
 
 ## Try the current interface
 
@@ -11,12 +11,12 @@ The existing private review deployment is https://workshop-ready-wili.williworkm
 | View | Available in this build |
 | --- | --- |
 | Overview | Location/date filters, calculated sample totals, weekly case chart, review progress and pending observations. |
-| Image review | Sample illustration, reference guides, searchable/status-filtered queue, validated manual count correction/rejection and browser-local review saving. |
+| Image review | Saved original photos, image-specific routing checks, Firebase counting adapter, validated human review and audit history; demo fixtures remain on their own tab. |
 | Trends & modelling | Observed changes, case comparison, accessible chart-data table and explicit not-run states for the planned model and hypothesis tests. |
 | Field planning | Sample location signals and a manually selected demo follow-up list. |
 | Data & settings | CSV exports, reset of demo edits, four processing preferences, read-only capacity check and Firebase configuration form. |
 
-Use **Image review** to edit a sample count, then return to **Overview**. The totals update and reviews survive a page refresh when browser storage is available. **Preview your image** displays a JPG/PNG/WebP locally in the tab; it does not save, upload or analyse the image, and sample counting/review controls are disabled while the personal image is being previewed.
+Use **Image review → Your image tests → Add an image** to save a still JPG/PNG/WebP (up to 8 MB / 16 megapixels), container ID, date, target kind and fictional demo location. Manual review works immediately without Firebase. Original image bytes and all analysis/review versions are saved in IndexedDB on this browser; clearing browser data removes them. They are not synced across devices. **Demo examples** contains the separate predefined illustrations and fixture reviews used by the synthetic overview.
 
 All sample estimates are fixtures. The illustration guides are reference positions, not detections. Charts and percentage changes are calculated from the synthetic records; no trained model or causal efficacy finding is implied.
 
@@ -38,7 +38,7 @@ npm test
 npm run build
 ```
 
-No Firebase account or model download is required to explore the current demonstration interface.
+No Firebase account or model download is required to import images, save manual reviews or explore the demonstration interface.
 
 ## Processing preferences
 
@@ -49,9 +49,9 @@ Cloud only is the default. Data & settings retains these choices:
 - Prefer device, allow cloud fallback.
 - Device only — no cloud fallback.
 
-In this milestone these preferences are saved, but the dashboard does not invoke an AI model. The existing Firebase initialization, App Check and guarded text-routing modules remain in the repository for the next integration stage.
+The image adapter applies these preferences when you explicitly request an AI count. Cloud-only skips the local availability probe and model preparation. Preference modes route to cloud when an image-capable local model is not already ready. Device-only rejects an unavailable/undownloaded model before making a provider request. No mode starts a managed-model download in this implementation.
 
-Image routing must be validated separately: the existing local browser capability check covers text, not vision. Device-only must never silently upload data. Browser numeric computation is also distinct from on-device LLM inference.
+The new image check declares image + English text input, separately from the retained text capacity reader. The prepared local image path is implemented but unverified on eligible hardware. The supplied 8 GB laptop remains unsuitable for Chrome’s managed model. Actual cloud/device source is taken from the SDK response; unknown or disallowed sources fail visibly. Manual counting and browser numeric computation are distinct from on-device LLM inference.
 
 ## Firebase can be connected later
 
@@ -59,7 +59,7 @@ Image routing must be validated separately: the existing local browser capabilit
 2. Enable Firebase AI Logic and a supported image-capable cloud model.
 3. Set up App Check with reCAPTCHA Enterprise and allow the deployed domain.
 4. Enter the public Firebase web configuration, public App Check site key and model ID in **Data & settings**, or use the public variables in [.env.example](.env.example).
-5. Verify the real image adapter and a live response after they are implemented. **Saving settings does not verify a connection.**
+5. Later, run **Request AI count** on a saved image and verify the real response, model/source label and App Check behavior. The adapter is implemented, but this live test is still pending. **Saving settings does not verify a connection.**
 
 Never enter service-account keys or App Check debug tokens into the form or repository. For local development only, `VITE_APPCHECK_DEBUG=true` is honored by the existing AI module in Vite development mode; register the generated debug token privately in Firebase Console. Hosted builds require the production provider.
 
@@ -69,7 +69,10 @@ Never enter service-account keys or App Check debug tokens into the form or repo
 - Reviews and manual follow-up choices use `wolbachia-field-review:workspace:v1` in localStorage. Old workshop drafts are kept separate.
 - Original fixture estimates remain available after correction; rejected observations have no reviewed numeric count.
 - CSV exports include the synthetic dataset ID and provenance.
-- Image previews use temporary object URLs and disappear on navigation/reload. Durable images and real observation ingestion belong to the image-workflow stage.
+- Imported photos use a separate IndexedDB records/image store; queue reads load metadata only and the selected image is decoded for display. Import checks the image signature, dimensions, file size and SHA-256 hash. The original is saved without resizing.
+- A fresh AI count appends a result instead of replacing prior estimates. It invalidates the previous review for the new analysis version; old reviews remain in history. Wrong-image hashes, stale reviews and cancelled late results are rejected.
+- A model unable to count returns a null estimate rather than an invented zero. Corrections and rejections require a reason. CSV exports preserve upload/model/manual provenance; the JSON audit includes all analyses/reviews but no image bytes.
+- Saved image tests do not change the synthetic case charts. Combining them with planning/model features belongs to the next analysis stage. Resetting demo edits does not delete saved photo records.
 - The built service worker retains the application-shell caching mechanism. Reopening the deployed app offline still needs verification; a saved review is not offline AI generation.
 
 ## Capacity and local-AI learning
@@ -80,13 +83,13 @@ The owner-run [terminal readers](docs/capacity-routing.md) and [Qwen learning ex
 
 ## Next stages
 
-1. Real image ingestion and image-analysis adapter, with review provenance.
+1. Your deferred real-photo tests, Firebase/App Check configuration and live inference verification.
 2. Small ML model, chronological evaluation and properly specified exploratory hypothesis tests.
 3. Evidence-linked location suggestions, human approval and report export.
 4. Live Firebase/App Check and task-specific routing verification on the deployed domain.
 5. End-to-end checks, public judging access, current contest-rule review and demonstration recording.
 
-See [step 1 scope](docs/wolbachia-step-1.md) and [step 2 implementation notes](docs/wolbachia-step-2.md). Historical workshop setup notes are archived [here](docs/legacy-workshop-readme.md).
+See [step 1 scope](docs/wolbachia-step-1.md), [step 2 implementation notes](docs/wolbachia-step-2.md) and [step 3 implementation/test boundary](docs/wolbachia-step-3.md). Historical workshop setup notes are archived [here](docs/legacy-workshop-readme.md).
 
 ## Deploy
 
