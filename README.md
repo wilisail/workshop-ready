@@ -4,6 +4,8 @@ A cloud-first research prototype for reviewing release-container observations, e
 
 The repository remains `wilisail/workshop-ready`. **Step 3 implementation is ready:** saved image observations, guarded Firebase image-counting adapters and append-only analysis/review history are implemented. Your real-photo tests and live Firebase verification are deferred. Evaluated ML and generated planning recommendations remain future work.
 
+The current presentation follows a Lotus Notes-inspired workbench: muted blue/lavender and gray, working view tabs, compact panels and table grids. The [updated workplan](docs/wolbachia-updated-plan.md) refocuses the next stages on container quality assurance and a reviewable study workflow. The planned model text reflects that scope; the model and study features are still pending.
+
 ## Try the current interface
 
 The existing private review deployment is https://workshop-ready-wili.williworkmail.chatgpt.site. It retains its existing access restrictions and is not yet a public judging URL.
@@ -84,8 +86,8 @@ The owner-run [terminal readers](docs/capacity-routing.md) and [Qwen learning ex
 ## Next stages
 
 1. Your deferred real-photo tests, Firebase/App Check configuration and live inference verification.
-2. Small ML model, chronological evaluation and properly specified exploratory hypothesis tests.
-3. Evidence-linked location suggestions, human approval and report export.
+2. Container-QA records and guided study setup/review, followed by an evaluated container-performance ML example.
+3. Evidence-linked inspection priorities, human decisions and study/report export.
 4. Live Firebase/App Check and task-specific routing verification on the deployed domain.
 5. End-to-end checks, public judging access, current contest-rule review and demonstration recording.
 

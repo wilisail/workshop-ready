@@ -1,5 +1,7 @@
 # Step 1 — Wolbachia dashboard baseline and migration scope
 
+Historical scope: the prediction target and remaining sequence below are superseded by [the updated plan](wolbachia-updated-plan.md), dated 21 November 2026.
+
 Date: 21 November 2026 (WIB).
 Repository: https://github.com/wilisail/workshop-ready
 Audited GitHub commit: 8b13b0c231fbe4eee4484b65724ab631d62dcbe1
