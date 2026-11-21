@@ -19,7 +19,7 @@ test('malformed saved state cannot introduce invalid counts, record IDs or follo
   const state = parseDashboardState(JSON.stringify({ version: 1, mode: 'invalid', reviews: { 'OBS-004': edit, 'not-a-record': { ...edit, count: 4 } }, followUps: ['KEN','not-a-location','KEN'] }));
   assert.deepEqual(state.reviews, {});
   assert.deepEqual(state.followUps, ['KEN']);
-  assert.equal(state.mode, 'cloud');
+  assert.equal(state.mode, 'cloud-first');
   assert.deepEqual(parseDashboardState('{broken'), emptyDashboardState());
   assert.deepEqual(parseDashboardState('{"note":"an old workshop draft"}'), emptyDashboardState());
 });

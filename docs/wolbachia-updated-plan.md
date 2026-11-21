@@ -1,6 +1,8 @@
 # Wolbachia Field Review — updated implementation plan
 
-Updated: 21 November 2026 (WIB).
+Updated: 22 November 2026 (WIB).
+
+**Route update (0.8):** the product now uses a small Vercel/browser bead counter without Firebase setup. Firebase integration is optional and deferred; the legacy steps below retain the earlier contest-route estimates. See `vercel-counter.md`. Public demo: https://workshop-ready-theta.vercel.app/.
 Repository: https://github.com/wilisail/workshop-ready
 
 This plan supersedes the prediction target and remaining implementation sequence in `wolbachia-step-1.md`. That document remains a record of the earlier scope. Work already implemented is retained.
@@ -38,7 +40,7 @@ Effort is an estimate of active project time, not elapsed calendar time or a com
 
 Remaining work after step 5: approximately 6–8 hours, or 10–14 hours including buffer. These ranges exclude physical assembly, field studies, publication work, a complete general-purpose statistical adviser and any newly discovered contest/platform changes.
 
-Next work order: 6 → 7. Step 3 testing can take place alongside these stages once Firebase is connected. Its allowance covers owner-operated tests and interpretation; step 6 covers project/domain configuration and integration verification. No setup or photographs are required from the owner to implement 4A–4B.
+Current work order: test prepared bead photos → rehearse the independent product demo → decide separately whether to finish Firebase judging requirements. Step 3 bead-photo testing can now use the small counter without Firebase. The optional Firebase adapter requires its own later verification. Its allowance covers owner-operated tests and interpretation; step 6 covers project/domain configuration and integration verification. No setup or photographs are required from the owner to implement 4A–4B.
 
 ## Analysis order and model improvement
 

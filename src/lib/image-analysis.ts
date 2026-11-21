@@ -1,6 +1,7 @@
 import type { ProcessingMode } from './dashboard.ts';
 import type { LocalAvailability } from './capacity.ts';
 import { resolveSource } from './notes.ts';
+import type { CounterEvidence } from './bead-counter.ts';
 
 export type ImageKind = 'bead_proxy' | 'larvae';
 export const PROMPT_VERSION = 'visible-objects-v1';
@@ -20,6 +21,9 @@ export interface ImageAnalysis extends CountOutput {
   elapsedMs: number;
   routingNote: string;
   rawResponse: string;
+  engine?: 'bead_cv' | 'firebase';
+  execution?: 'vercel-function' | 'browser-worker' | 'development-server';
+  counterEvidence?: CounterEvidence;
 }
 export interface ImageRoute { mode: ProcessingMode; prepareDevice: boolean; explanation: string; }
 

@@ -1,0 +1,10 @@
+import type { CounterOptions } from '../lib/bead-counter.ts';
+import { defaultCounterOptions } from '../lib/bead-counter.ts';
+export default function CounterControls({ options, onChange, disabled }: { options: CounterOptions; onChange: (options: CounterOptions) => void; disabled: boolean }) {
+  return <details className="counter-controls"><summary>Count area & foreground settings</summary><p className="helper">For separated beads against a plain background. These are demonstration settings, not biological cutoffs. The saved result retains the settings actually used.</p>
+    <div className="counter-options"><div><label htmlFor="counter-foreground">Foreground</label><select id="counter-foreground" value={options.foreground} disabled={disabled} onChange={e=>onChange({...options,foreground:e.target.value as CounterOptions['foreground']})}><option value="dark">Dark objects</option><option value="light">Light objects</option><option value="colour">Colour difference</option></select></div>
+    {(['threshold','minArea','maxArea'] as const).map(key=><div key={key}><label htmlFor={'counter-'+key}>{({threshold:'Threshold (0–255)',minArea:'Minimum area (pixels)',maxArea:'Maximum area (pixels)'})[key]}</label><input id={'counter-'+key} type="number" step="1" min={key==='threshold'?0:1} max={key==='threshold'?255:589824} value={options[key]} disabled={disabled} onChange={e=>onChange({...options,[key]:Number(e.target.value)})}/></div>)}</div>
+    <fieldset disabled={disabled}><legend>Selected area (% of image)</legend><div className="counter-options">{(['x','y','width','height'] as const).map(key=><div key={key}><label htmlFor={'counter-roi-'+key}>{({x:'Left',y:'Top',width:'Width',height:'Height'})[key]}</label><input id={'counter-roi-'+key} type="number" min="0" max="100" step="1" value={options.roi[key]} onChange={e=>onChange({...options,roi:{...options.roi,[key]:Number(e.target.value)}})}/></div>)}</div></fieldset>
+    <button className="subtle-button" disabled={disabled} onClick={()=>onChange(defaultCounterOptions())}>Reset counting settings</button>
+  </details>;
+}

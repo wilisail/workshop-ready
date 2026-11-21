@@ -69,7 +69,7 @@ export const OBSERVATIONS: Observation[] = LOCATIONS.flatMap((location, i) => [0
 }));
 
 export function emptyDashboardState(): DashboardState {
-  return { version: 1, mode: 'cloud', reviews: {}, followUps: [] };
+  return { version: 1, mode: 'cloud-first', reviews: {}, followUps: [] };
 }
 export function parseDashboardState(raw: string | null): DashboardState {
   const clean = emptyDashboardState();

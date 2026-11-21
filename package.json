@@ -1,9 +1,9 @@
 {
   "name": "workshop-ready",
   "private": true,
-  "version": "0.7.0",
+  "version": "0.8.0",
   "type": "module",
-  "description": "Wolbachia image review and planning prototype with durable local photos, Firebase counting adapters and review provenance.",
+  "description": "Wolbachia container QA and research workbench with a small Vercel/browser image counter, numeric ML evaluation and accountable inspection planning.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",

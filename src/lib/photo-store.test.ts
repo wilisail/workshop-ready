@@ -43,3 +43,14 @@ test('invalid dates and unknown locations are rejected before an observation is 
 test('image names and container labels cannot become spreadsheet formulas on export',()=>{
   for(const value of ['=1+1','  =1+1','+command','@SUM(A1)','-command']) assert.ok(csvCell(value).startsWith('"\''));
 });
+
+test('generated proxies and CV runtime evidence survive reopening and exports without becoming uploaded field data',async()=>{
+  const factory=new IDBFactory(),store=createPhotoStore(factory,'cv-proxy-history');
+  await store.add({...record(),provenance:'generated_proxy',referenceCount:8},blob);
+  const cv:ImageAnalysis={...analysis(),engine:'bead_cv',execution:'browser-worker',source:'device',count:8,model:'CV baseline'};
+  await store.appendAnalysis('image-1',cv);await store.appendReview('image-1',{...review(),count:8});await store.close();
+  const reopened=createPhotoStore(factory,'cv-proxy-history'),saved=(await reopened.list())[0];
+  assert.equal(saved.provenance,'generated_proxy');assert.equal(saved.referenceCount,8);assert.equal(saved.analyses[0].execution,'browser-worker');assert.equal(currentReview(saved)?.count,8);
+  assert.match(photoCsv([saved]),/generated_proxy/);assert.match(photoCsv([saved]),/"bead_cv","browser-worker","8"/);assert.equal(JSON.parse(photoAudit(saved)).record.analyses[0].source,'device');
+  const rerun=await reopened.appendAnalysis('image-1',{...cv,id:'cv-rerun'});assert.equal(currentReview(rerun),undefined);assert.equal(rerun.reviews.length,1);await reopened.close();
+});
