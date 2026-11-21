@@ -17,7 +17,7 @@ The submission demonstration remains cloud-first, using prepared bead photograph
 - Saved image import, manual review, Firebase image adapter, routing guards and analysis/review history are implemented. Actual photo accuracy and live Firebase/App Check remain unverified and owner testing is deferred.
 - This release applies a Lotus Notes-inspired presentation: muted blue/lavender and gray, a title strip, working view tabs, compact rectangular panels, table grids and a status bar. Existing image storage and inference behavior are retained.
 - The modelling workbench now fits and evaluates a small numeric model on a retained QA snapshot. It keeps predictions separate from the case charts and supplies explicit insufficient-data results. The synthetic exercise does not establish useful field performance.
-- Container-QA records are implemented in step 4A, including explicit unknowns, provenance, separately entered outcomes and revision/export support. Step 4B adds two study templates, dated plan revisions, pinned inputs, descriptive/readiness checks and review exports. Step 4C adds real numeric training/evaluation on grouped chronological partitions, two baselines, uncertainty notes and model-aware review/export. Generated inspection suggestions remain pending. See `wolbachia-step-4a.md`, `wolbachia-step-4b.md` and `wolbachia-step-4c.md`.
+- Container-QA records are implemented in step 4A, including explicit unknowns, provenance, separately entered outcomes and revision/export support. Step 4B adds two study templates, dated plan revisions, pinned inputs, descriptive/readiness checks and review exports. Step 4C adds real numeric training/evaluation on grouped chronological partitions, two baselines, uncertainty notes and model-aware review/export. Step 5 adds rule-based inspection suggestions, capacity, human decisions, source-change guards and exports. See `wolbachia-step-4a.md`, `wolbachia-step-4b.md`, `wolbachia-step-4c.md` and `wolbachia-step-5.md`.
 
 ## Updated steps
 
@@ -31,14 +31,20 @@ Effort is an estimate of active project time, not elapsed calendar time or a com
 | 4A | Container-QA records: batch/setup dates, stage counts, condition, measured temperature/source and independently checked outcomes | Assistant | Implemented and checked | — |
 | 4B | Study setup/review: two focused templates, outcome/unit/comparator, sampling rationale, a dated plan, checks and review export | Assistant; user reviews wording | Implemented and checked | — |
 | 4C | Numeric ML/evaluation: container-performance target, simple baseline, held-out containers/dates and appropriate error/uncertainty reporting | Assistant | Implemented and checked on synthetic data | — |
-| 5 | Inspection planning/report: evidence-linked priorities, missing data, reasons and recorded human decisions | Assistant; user checks flow | Manual demo list exists; generated workflow planned | 2–3 |
-| 6 | Firebase/App Check: connect the project, verify deployed image requests and actual inference-source/routing behavior | User supplies console setup; assistant integrates | Adapter exists; live verification pending | 2–3 |
+| 5 | Inspection planning/report: evidence-linked priorities, missing data, reasons and recorded human decisions | Assistant; user checks flow | Implemented and checked on synthetic evidence | — |
+| 6 | Firebase/App Check: connect the project, verify deployed image requests and actual inference-source/routing behavior | Owner authorizes connection; assistant uses supported plugin/MCP operations and integrates | Adapter exists; live verification pending | 2–3 |
 | 7 | End-to-end QA and submission: rehearse, review current rules and judging access, prepare video and submission materials | Assistant prepares; user records/submits | Pending | 3–4 |
 | Buffer | Correct observed image, data, integration, layout or deployment failures | Both | Reserved | 4–6 |
 
-Remaining work after 4C: approximately 8–11 hours, or 12–17 hours including buffer. These ranges exclude physical assembly, field studies, publication work, a complete general-purpose statistical adviser and any newly discovered contest/platform changes.
+Remaining work after step 5: approximately 6–8 hours, or 10–14 hours including buffer. These ranges exclude physical assembly, field studies, publication work, a complete general-purpose statistical adviser and any newly discovered contest/platform changes.
 
-Next work order: 5 → 6 → 7. Step 3 testing can take place alongside these stages once Firebase is connected. Its allowance covers owner-operated tests and interpretation; step 6 covers project/domain configuration and integration verification. No setup or photographs are required from the owner to implement 4A–4B.
+Next work order: 6 → 7. Step 3 testing can take place alongside these stages once Firebase is connected. Its allowance covers owner-operated tests and interpretation; step 6 covers project/domain configuration and integration verification. No setup or photographs are required from the owner to implement 4A–4B.
+
+## Analysis order and model improvement
+
+The analytical order is data collection/QA → descriptive exploration and readiness/design checks → training and held-out evaluation → operational inspection planning. Step 5 is the last of these, not EDA. Step 4B already supplies basic descriptive/readiness checks before 4C; it is not a complete EDA workbench.
+
+The current logistic regression fits coefficients when explicitly run. It does not continuously learn from new records. Importing a standard estimator supplies a working algorithm, not pretrained Wolbachia knowledge or a guaranteed improvement over the constant baseline. A later comparison can include regularized logistic regression, random forests or gradient boosting, with train-only preprocessing and tuning, a new untouched evaluation set and failure recall reported alongside accuracy. Reusing the known 4C test set to choose a winner would make it a development set rather than a fresh test. New field records require outcome quality checks and explicit versioned retraining/evaluation. The existing synthetic 60% versus 70% result remains unchanged.
 
 ## 4A acceptance boundary
 
@@ -82,3 +88,11 @@ All 60 automated checks and the TypeScript/Vite production build passed. Browser
 ## 4C verification
 
 All 76 automated checks and the production build passed. The optional Python reference script independently checked training-only preprocessing, reconstructed scores, confusion counts, Brier loss and Wilson arithmetic. The fixed-step TypeScript optimizer differed from converged scikit-learn scores by at most 0.00663 on the synthetic fixture; this is a numerical check, not field validation. Browser QA checked insufficient-data behavior, real training, saved model review, review invalidation on rerun, persistence after reload, audit/report/CSV exports and case-filter independence. The 390 px frame retained 375 px usable/document/body width with model evidence tables and parameters expanded. The temporary harness was removed. No live Firebase or biological image/field validation is included.
+
+## Step 5 acceptance and verification
+
+Inspection planning pins one data origin and current QA records or a recorded study's QA snapshot. Latest dated condition/outcome evidence, same-day ambiguity and chosen completeness/age checks supply explicit inspection/data-review reasons. Future observations are excluded from the queue; later QA/emergence assessments are masked when deriving reasons. These are illustrative workflow rules, not a release protocol. Optional field requirements, observation age and task capacity are editable choices.
+
+All candidates remain visible. Accept/defer/dismiss decisions require attribution and reasons; accepted tasks need an assignee/date, and deferrals need a next-review date. Full history and source revisions are exported. Source changes block new decisions, and regeneration creates a separate plan without copying decisions. Model scores, dengue charts, infection inference and release quantities do not rank the queue.
+
+All 89 automated checks and the production build passed. Browser QA checked a capacity-one queue, all three decision actions, reload persistence, report/CSV/JSON contents, a QA correction, blocked decisions on the stale plan, regeneration with no inherited decisions, a study/model-context plan and the capacity filter. The 390 px frame retained 375 px usable/document/body width with evidence/history expanded and the decision form visible. The responsive harness was removed before release. These checks establish prototype behavior, not field usefulness, biological accuracy, live Firebase or offline-generation capability.

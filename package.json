@@ -1,7 +1,7 @@
 {
   "name": "workshop-ready",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "type": "module",
   "description": "Wolbachia image review and planning prototype with durable local photos, Firebase counting adapters and review provenance.",
   "scripts": {

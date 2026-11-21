@@ -6,6 +6,7 @@ import './notes.css';
 import './qa.css';
 import './studies.css';
 import './models.css';
+import './inspection.css';
 
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
 
