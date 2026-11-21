@@ -1,203 +1,188 @@
-import { useEffect, useRef, useState } from 'react';
-import { friendlyError, organizeNotes } from './lib/ai.ts';
-import { checkLocalAvailability, formatCapacityBytes, planRoute, readBrowserCapacity } from './lib/capacity.ts';
-import type { BrowserCapacity, LocalAvailability } from './lib/capacity.ts';
-import { MAX_NOTE_LENGTH, SAMPLE_NOTE, SAMPLE_RESULT, resultAsText } from './lib/notes.ts';
-import type { InferenceModeChoice, NoteResult } from './lib/notes.ts';
-import { parseFirebaseConfig, readDraft, readSettings, saveDraft, storeSettings } from './lib/storage.ts';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { FormEvent } from 'react';
+import Icon from './components/Icon.tsx';
+import type { IconName } from './components/Icon.tsx';
+import CaseChart from './components/CaseChart.tsx';
+import BeadSample from './components/BeadSample.tsx';
+import { readBrowserCapacity, formatCapacityBytes } from './lib/capacity.ts';
+import type { BrowserCapacity } from './lib/capacity.ts';
+import { parseFirebaseConfig, readSettings, storeSettings } from './lib/storage.ts';
 import type { FirebaseSettings } from './lib/storage.ts';
+import { caseSeries, csvCell, DASHBOARD_KEY, DATASET_ID, filteredObservations, LOCATIONS, locationName, MODE_LABELS, observationCsv, percentChange, PERIOD_END, readDashboardState, shortDate, validateReviewCount, VIEWS, WEEKS } from './lib/dashboard.ts';
+import type { DashboardState, Observation, ProcessingMode, ReviewStatus, View } from './lib/dashboard.ts';
 
-type IconName = 'note' | 'arrow' | 'check' | 'cloud' | 'device' | 'settings' | 'copy' | 'close' | 'alert' | 'download' | 'spark' | 'wifi';
-function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
-  const paths: Record<IconName, React.ReactNode> = {
-    note: <><path d="M8 4H5v17h14V4h-3"/><path d="M9 2h6v5H9zM8 12h8M8 16h5"/></>,
-    arrow: <><path d="M4 12h15M13 6l6 6-6 6"/></>,
-    check: <path d="m5 12 4 4L19 6"/>,
-    cloud: <path d="M6 18h12a4 4 0 0 0 .5-8A6.5 6.5 0 0 0 6 8a5 5 0 0 0 0 10Z"/>,
-    device: <><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8M12 16v5"/></>,
-    settings: <><path d="M4 7h16M4 17h16"/><circle cx="8" cy="7" r="3"/><circle cx="16" cy="17" r="3"/></>,
-    copy: <><rect x="8" y="8" width="12" height="13" rx="2"/><path d="M16 8V3H3v13h5"/></>,
-    close: <path d="m6 6 12 12M18 6 6 18"/>,
-    alert: <><path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 17h.01"/></>,
-    download: <><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></>,
-    spark: <><path d="m12 3 2.2 6.8L21 12l-6.8 2.2L12 21l-2.2-6.8L3 12l6.8-2.2L12 3Z"/></>,
-    wifi: <><path d="M3 8a15 15 0 0 1 18 0M6 12a10 10 0 0 1 12 0M9 16a5 5 0 0 1 6 0M12 20h.01"/></>,
-  };
-  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-}
-
-const LOCAL_LABELS: Record<LocalAvailability | 'unchecked', string> = {
-  unchecked: 'Local model not checked', available: 'Local model ready', downloadable: 'Local model needs a download', downloading: 'Local model downloading', unavailable: 'Local model unavailable here', unknown: 'Local readiness could not be confirmed',
+const NAV: { id: View; name: string; icon: IconName }[] = [
+  { id: 'overview', name: 'Overview', icon: 'overview' }, { id: 'review', name: 'Image review', icon: 'image' },
+  { id: 'trends', name: 'Trends & modelling', icon: 'chart' }, { id: 'planning', name: 'Field planning', icon: 'pin' },
+  { id: 'settings', name: 'Data & settings', icon: 'settings' },
+];
+const TITLES: Record<View, [string, string]> = {
+  overview: ['Field overview', 'Release-container observations, review queues and reported case trends.'],
+  review: ['Image review', 'Inspect a sample, check the count and record your review.'],
+  trends: ['Trends & modelling', 'Explore observed changes. Keep prediction and evidence distinct.'],
+  planning: ['Field planning', 'Compare locations and assemble a demonstration follow-up list.'],
+  settings: ['Data & settings', 'Manage this demonstration workspace and your processing preferences.'],
 };
-
-function Settings({ initial, onClose, onSave }: { initial: FirebaseSettings | null; onClose: () => void; onSave: (value: FirebaseSettings) => void }) {
-  const dialog = useRef<HTMLDialogElement>(null);
-  const [config, setConfig] = useState(initial ? JSON.stringify(initial.config, null, 2) : '');
-  const [siteKey, setSiteKey] = useState(initial?.siteKey || '');
-  const [model, setModel] = useState(initial?.model || 'gemini-3.5-flash-lite');
+const STATUS: Record<ReviewStatus, string> = { pending: 'To review', reviewed: 'Reviewed', rejected: 'Rejected' };
+function Badge({ status }: { status: ReviewStatus }) { return <span className={'badge badge-' + status}>{status === 'reviewed' && <Icon name="check" size={13}/>} {STATUS[status]}</span>; }
+function PanelTitle({ title, subtitle, action }: { title: string; subtitle?: string; action?: React.ReactNode }) {
+  return <div className="panel-title"><div><h2>{title}</h2>{subtitle && <p>{subtitle}</p>}</div>{action}</div>;
+}
+function DownloadButton({ children, onClick }: { children: React.ReactNode; onClick: () => void }) { return <button className="button secondary" onClick={onClick}><Icon name="download" size={16}/>{children}</button>; }
+function downloadFile(filename: string, contents: string) {
+  const url = URL.createObjectURL(new Blob([contents], { type: 'text/csv;charset=utf-8' }));
+  const a = document.createElement('a'); a.href = url; a.download = filename; document.body.append(a); a.click(); a.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function initialView(): View { const hash = window.location.hash.slice(1); return VIEWS.includes(hash as View) ? hash as View : 'overview'; }
+function changeLabel(current: number, previous: number): string {
+  const change = percentChange(current, previous);
+  return change === null ? 'No prior-week comparison' : (change > 0 ? '+' : '') + change.toFixed(1) + '% vs prior week';
+}
+function FirebaseForm({ settings, onSave }: { settings: FirebaseSettings | null; onSave: (value: FirebaseSettings) => void }) {
+  const [config, setConfig] = useState(settings ? JSON.stringify(settings.config, null, 2) : '');
+  const [siteKey, setSiteKey] = useState(settings?.siteKey || '');
+  const [model, setModel] = useState(settings?.model || '');
   const [error, setError] = useState('');
-  useEffect(() => { dialog.current?.showModal(); }, []);
-  function save(event: React.FormEvent) {
-    event.preventDefault();
+  function submit(event: FormEvent) {
+    event.preventDefault(); setError('');
     try {
-      const settings = { config: parseFirebaseConfig(config), siteKey: siteKey.trim(), model: model.trim() };
-      if (!settings.siteKey && !(import.meta.env.DEV && import.meta.env.VITE_APPCHECK_DEBUG === 'true')) throw new Error('Add the reCAPTCHA Enterprise site key for App Check.');
-      if (!settings.model) throw new Error('Add a cloud model name.');
-      storeSettings(settings);
-      onSave(settings);
-    } catch (err) { setError(err instanceof Error ? err.message : 'Settings could not be saved.'); }
+      const value = { config: parseFirebaseConfig(config), siteKey: siteKey.trim(), model: model.trim() };
+      if (!value.siteKey && !(import.meta.env.DEV && import.meta.env.VITE_APPCHECK_DEBUG === 'true')) throw new Error('Add the public reCAPTCHA Enterprise site key for App Check.');
+      if (!value.model) throw new Error('Enter the model ID you enabled in Firebase.');
+      storeSettings(value); onSave(value);
+    } catch (err) { setError(err instanceof Error ? err.message : 'Settings could not be saved in this browser.'); }
   }
-  return <dialog ref={dialog} className="settings-dialog" aria-labelledby="settings-title" onCancel={event => { event.preventDefault(); onClose(); }} onClick={event => { if (event.target === event.currentTarget) onClose(); }}>
-    <form onSubmit={save}>
-      <div className="dialog-title"><div><span className="eyebrow">ONE-TIME SETUP</span><h2 id="settings-title">Connect your Firebase project</h2></div><button type="button" className="icon-button" aria-label="Close settings" onClick={onClose}><Icon name="close"/></button></div>
-      <p className="dialog-intro">The interface is ready. Live AI needs your Firebase web app configuration and App Check setup. These public settings stay in this browser.</p>
-      <label htmlFor="firebase-config">Firebase web configuration <span>JSON</span></label>
-      <textarea id="firebase-config" className="config-input" spellCheck={false} placeholder={'{\n  "apiKey": "your-web-api-key",\n  "projectId": "your-project",\n  "appId": "your-web-app-id"\n}'} value={config} onChange={event => setConfig(event.target.value)} required/>
-      <label htmlFor="site-key">App Check site key</label>
-      <input id="site-key" placeholder="reCAPTCHA Enterprise site key" value={siteKey} onChange={event => setSiteKey(event.target.value)}/>
-      <label htmlFor="cloud-model">Cloud model</label>
-      <input id="cloud-model" value={model} onChange={event => setModel(event.target.value)} required/>
-      <p className="settings-hint">Enable Firebase AI Logic and enforce App Check in your project. Authorize this site's domain in reCAPTCHA Enterprise. Local development instructions are in the repository.</p>
-      {error && <p className="error-message" role="alert">{error}</p>}
-      <div className="dialog-actions"><button type="button" className="text-button" onClick={onClose}>Set up later</button><button className="primary-button" type="submit">Save settings <Icon name="arrow" size={17}/></button></div>
-    </form>
-  </dialog>;
+  return <form className="firebase-form" onSubmit={submit}>
+    <div className="inline-note"><Icon name="info" size={17}/><p>You can connect later. Saving configuration does not make a live request or verify the connection.</p></div>
+    <label htmlFor="firebase-config">Firebase web app configuration <span>Public JSON</span></label>
+    <textarea id="firebase-config" className="code-input" value={config} onChange={e => setConfig(e.target.value)} spellCheck={false} placeholder={'{\n  "apiKey": "your-web-api-key",\n  "projectId": "your-project",\n  "appId": "your-web-app-id"\n}'} required/>
+    <div className="form-grid"><div><label htmlFor="site-key">App Check site key</label><input id="site-key" value={siteKey} onChange={e => setSiteKey(e.target.value)} placeholder="reCAPTCHA Enterprise site key"/></div><div><label htmlFor="model-id">Cloud model ID</label><input id="model-id" value={model} onChange={e => setModel(e.target.value)} placeholder="Model enabled in your project" required/></div></div>
+    <p className="helper">Use the Firebase web configuration and public site key. Keep service-account keys and App Check debug tokens out of this form. A supported image model will be verified when live counting is connected.</p>
+    {error && <p className="form-error" role="alert">{error}</p>}<button className="button primary" type="submit">Save Firebase settings</button>
+  </form>;
 }
 
-function App() {
-  const [initial] = useState(readDraft);
-  const [note, setNote] = useState(initial.note);
-  const [mode, setMode] = useState<InferenceModeChoice>(initial.mode);
+export default function App() {
+  const [view, setView] = useState<View>(initialView);
+  const [state, setState] = useState<DashboardState>(readDashboardState);
   const [settings, setSettings] = useState<FirebaseSettings | null>(readSettings);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [result, setResult] = useState<NoteResult | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [progress, setProgress] = useState('');
-  const [error, setError] = useState('');
-  const [saved, setSaved] = useState(true);
-  const [copied, setCopied] = useState(false);
-  const [online, setOnline] = useState(navigator.onLine);
-  const [localStatus, setLocalStatus] = useState<LocalAvailability | 'unchecked'>('unchecked');
-  const [capacity, setCapacity] = useState<BrowserCapacity | null>(null);
-  const [checking, setChecking] = useState(false);
-  const [cacheFailed, setCacheFailed] = useState(false);
-  const controller = useRef<AbortController | null>(null);
-  const requestId = useRef(0);
-  const stale = Boolean(result && result.input !== note);
-  useEffect(() => { setSaved(saveDraft(note, mode)); }, [note, mode]);
-  useEffect(() => {
-    const update = () => setOnline(navigator.onLine);
-    const onCacheError = () => setCacheFailed(true);
-    window.addEventListener('online', update); window.addEventListener('offline', update); window.addEventListener('workshop-cache-error', onCacheError);
-    return () => { window.removeEventListener('online', update); window.removeEventListener('offline', update); window.removeEventListener('workshop-cache-error', onCacheError); };
-  }, []);
-  async function run() {
-    setError('');
-    if (!note.trim()) { setError('Add your workshop notes, or try the example first.'); return; }
-    if (!settings) {
-      if (mode === 'local') {
-        try {
-          const readiness = await checkLocalAvailability();
-          setLocalStatus(readiness);
-          planRoute(mode, readiness, navigator.onLine);
-        } catch (err) {
-          setError(err instanceof Error ? err.message : 'The local model is unavailable. No cloud request was made.');
-          return;
-        }
-      }
-      setSettingsOpen(true);
-      return;
-    }
-    const id = ++requestId.current;
-    const active = new AbortController(); controller.current = active;
-    setBusy(true);
-    try {
-      const output = await organizeNotes(note, mode, settings, active.signal, message => { if (id === requestId.current) setProgress(message); });
-      if (id === requestId.current) setResult(output);
-    } catch (err) { if (id === requestId.current) setError(friendlyError(err)); }
-    finally { if (id === requestId.current) { setBusy(false); setProgress(''); controller.current = null; } }
-  }
-  function stop() {
-    controller.current?.abort();
-    requestId.current++;
-    setBusy(false); setProgress('');
-    setError('Stopped waiting. Your draft is safe. A cloud request already sent may still finish on the server.');
-  }
-  function loadExample() {
-    setNote(SAMPLE_NOTE); setError('');
-    setResult({ ...SAMPLE_RESULT, source: 'sample', elapsedMs: 0, createdAt: new Date().toISOString(), input: SAMPLE_NOTE });
-  }
-  async function checkDevice() {
-    setChecking(true);
-    try { const report = await readBrowserCapacity(); setCapacity(report); setLocalStatus(report.localModel); }
-    catch { setError('Browser capacity could not be read. Cloud mode remains available after Firebase setup.'); }
-    finally { setChecking(false); }
-  }
-  async function copy() {
-    if (!result) return;
-    try { await navigator.clipboard.writeText(resultAsText(result)); setCopied(true); window.setTimeout(() => setCopied(false), 2000); }
-    catch { setError('Clipboard access was blocked. Use Download instead.'); }
-  }
-  function download() {
-    if (!result) return;
-    const url = URL.createObjectURL(new Blob([resultAsText(result)], { type: 'text/plain;charset=utf-8' }));
-    const link = document.createElement('a'); link.href = url; link.download = 'workshop-ready-notes.txt'; link.click(); URL.revokeObjectURL(url);
-  }
-  const sections = [
-    { key: 'ready', title: 'Ready', subtitle: 'Already in place', icon: 'check', empty: 'Completed items will appear here.' },
-    { key: 'blocked', title: 'Blocked', subtitle: 'What needs attention', icon: 'alert', empty: 'Missing items and dependencies will appear here.' },
-    { key: 'nextActions', title: 'Next actions', subtitle: 'A clear way forward', icon: 'arrow', empty: 'Follow-ups, owners and stated deadlines will appear here.' },
-  ] as const;
-  return <>
-    <header className="topbar"><a className="brand" href="/" aria-label="WorkshopReady home"><span className="brand-icon"><Icon name="note" size={23}/></span><span>Workshop<span className="brand-light">Ready</span></span></a><div className="topbar-actions"><span className={`connection ${online ? '' : 'offline'}`}><i/>{online ? 'Online' : 'Offline'}</span><button className="settings-button" onClick={() => setSettingsOpen(true)}><Icon name="settings" size={17}/><span>{settings ? 'Firebase settings' : 'Connect Firebase'}</span></button></div></header>
-    <main className="app-shell">
-      <section className="intro"><span className="eyebrow"><span className="tiny-line"/> LESS SORTING. MORE DOING.</span><h1>Rough notes.<br className="mobile-break"/> <em>Clear next steps.</em></h1><p>Make sense of the moving parts. Turn workshop and offsite notes<br className="desktop-break"/> into what's ready, what's blocked, and what happens next.</p></section>
-      <div className="workspace">
-        <section className="editor-panel" aria-labelledby="notes-heading">
-          <div className="panel-heading"><div><span className="step-number">01</span><h2 id="notes-heading">Your field notes</h2></div><button className="example-button" onClick={loadExample} disabled={busy}><Icon name="spark" size={15}/> Try an example</button></div>
-          <p className="panel-description">Messy is fine. Start with what you know.</p>
-          <div className="textarea-wrap"><label className="sr-only" htmlFor="note-input">Workshop notes</label><textarea id="note-input" className="note-input" placeholder={'What arrived? What’s missing?\nWho is doing what, and by when?\n\nPaste your notes here…'} value={note} maxLength={MAX_NOTE_LENGTH} onChange={event => setNote(event.target.value)} disabled={busy}/><div className="textarea-footer"><span className={saved ? '' : 'save-failed'}><Icon name={saved ? 'check' : 'alert'} size={13}/>{saved ? 'Draft saved on this browser' : 'Draft could not be saved'}</span><span>{note.length.toLocaleString()} / 12,000</span></div></div>
-          <div className="processing">
-            <div className="processing-title"><span>Processing</span><span className="recommended">YOU CHOOSE</span></div>
-            <label className="sr-only" htmlFor="mode-select">Processing mode</label>
-            <div className="mode-select-wrap"><Icon name={mode === 'cloud' || mode === 'cloud-first' ? 'cloud' : 'device'} size={19}/><select id="mode-select" value={mode} disabled={busy} onChange={event => setMode(event.target.value as InferenceModeChoice)}>
-              <option value="cloud">Cloud only — start here</option>
-              <option value="cloud-first">Prefer cloud, allow device fallback</option>
-              <option value="hybrid">Prefer device, allow cloud fallback</option>
-              <option value="local">Device only — no cloud fallback</option>
-            </select></div>
-            <p className="mode-description">{mode === 'cloud' ? 'Works on lighter laptops. Notes are sent to Firebase when you organize them.' : mode === 'cloud-first' ? 'Prefers the cloud model. A downloaded, compatible local model can act as a fallback.' : mode === 'hybrid' ? 'Checks local readiness on every request. Uses cloud immediately if the local model is not ready.' : 'Keeps processing on a compatible device. Your explicit Generate click may prepare or download its local model.'}</p>
-            <div className="device-check"><span><i className={localStatus === 'available' ? 'ready-dot' : ''}/>{LOCAL_LABELS[localStatus]}</span><button type="button" disabled={checking || busy} onClick={checkDevice}>{checking ? 'Checking…' : capacity ? 'Refresh reading' : 'Check device'}</button></div>
-            {capacity && <div className="capacity-report" aria-label="Browser capacity report">
-              <dl>
-                <div><dt>RAM estimate</dt><dd>{capacity.approximateMemoryGiB === null ? 'Not exposed' : `≈ ${capacity.approximateMemoryGiB} GiB`}</dd></div>
-                <div><dt>Browser threads</dt><dd>{capacity.logicalProcessors ?? 'Not exposed'}</dd></div>
-                <div><dt>Free system RAM</dt><dd>Not exposed</dd></div>
-                <div><dt>Site storage used</dt><dd>{formatCapacityBytes(capacity.storageUsageBytes)}</dd></div>
-                <div><dt>Site storage quota</dt><dd>{formatCapacityBytes(capacity.storageQuotaBytes)}</dd></div>
-                <div><dt>Connection hint</dt><dd>{capacity.onlineHint ? 'Online' : 'Offline'}</dd></div>
-              </dl>
-              <p>Read locally on your click. Browser values are approximate; site quota is not free disk space. Exact available RAM needs the optional owner-run terminal reader.</p>
-            </div>}
-          </div>
-          <div className="editor-actions">{busy ? <button className="primary-button stop-button" onClick={stop}><span className="spinner"/> Stop waiting</button> : <button className="primary-button organize-button" onClick={run}>Organize my notes <Icon name="arrow" size={19}/></button>}<button className="clear-button" disabled={busy || !note} onClick={() => { setNote(''); setResult(null); setError(''); }}>Clear</button></div>
-          <div className="live-status" aria-live="polite">{busy ? progress : !settings ? 'Connect Firebase to generate. The example is available now.' : 'Firebase configured. Generate a note to verify the connection.'}</div>
-          {error && <div className="error-message" role="alert"><Icon name="alert" size={17}/><span>{error}</span></div>}
-          {!online && <div className="info-message"><Icon name="wifi" size={17}/><span>You're offline. Keep editing; your draft stays in this browser.</span></div>}
-        </section>
-        <section className="results-panel" aria-labelledby="results-heading">
-          <div className="panel-heading"><div><span className="step-number">02</span><h2 id="results-heading">A little more clarity</h2></div>{result && <div className="result-tools"><button className="icon-button" onClick={copy} aria-label={copied ? 'Copied results' : 'Copy results'} title="Copy results"><Icon name={copied ? 'check' : 'copy'} size={17}/></button><button className="icon-button" onClick={download} aria-label="Download results" title="Download results"><Icon name="download" size={17}/></button></div>}</div>
-          <div className="results-summary">{result ? <><span className={`source-badge source-${result.source}`}><Icon name={result.source === 'cloud' ? 'cloud' : result.source === 'device' ? 'device' : 'spark'} size={13}/>{result.source === 'sample' ? 'Sample preview · no AI request' : result.source === 'device' ? 'Processed on device' : 'Processed in cloud'}</span>{result.source !== 'sample' && <span className="elapsed">{(result.elapsedMs / 1000).toFixed(1)}s</span>}</> : <span>Your organized notes will appear here.</span>}</div>
-          {stale && <div className="stale-message">Your note has changed. Organize it again to update these sections.</div>}
-          {result?.routingNote && <p className="routing-note">{result.routingNote}</p>}
-          <div className={`result-cards ${busy ? 'is-loading' : ''}`} aria-busy={busy}>{sections.map(section => <article key={section.key} className={`result-card card-${section.key}`}><div className="card-header"><span className="card-icon"><Icon name={section.icon} size={18}/></span><div><h3>{section.title}</h3><p>{section.subtitle}</p></div><span className="count-badge">{result ? result[section.key].length : '—'}</span></div>{result ? result[section.key].length ? <ul>{result[section.key].map((item, index) => <li key={`${section.key}-${index}`}><span className="list-dot"/>{item}</li>)}</ul> : <p className="empty-section">Nothing stated in this note.</p> : <div className="empty-card"><p>{section.empty}</p><span className="skeleton-line"/><span className="skeleton-line short"/></div>}</article>)}</div>
-          <div className="review-note"><Icon name="note" size={16}/><p>A starting point, not a final decision. Check names, deadlines and details before acting.</p></div>
-        </section>
-      </div>
-      <footer className="page-footer"><span><Icon name="check" size={14}/> Drafts stay on this browser.</span><span>Built for the work between the plans.</span></footer>
-      {cacheFailed && <p className="cache-warning">Offline page caching could not be enabled in this browser. Local draft saving is separate.</p>}
-    </main>
-    {settingsOpen && <Settings initial={settings} onClose={() => setSettingsOpen(false)} onSave={value => { setSettings(value); setSettingsOpen(false); setError(''); window.location.reload(); }}/>}</>;
-}
+  const [locationId, setLocationId] = useState('all'), [weeks, setWeeks] = useState(12);
+  const [mobileNav, setMobileNav] = useState(false), [saveFailed, setSaveFailed] = useState(false);
+  const [toast, setToast] = useState(''), [online, setOnline] = useState(navigator.onLine), [cacheFailed, setCacheFailed] = useState(false);
+  const [capacity, setCapacity] = useState<BrowserCapacity | null>(null), [checking, setChecking] = useState(false);
+  const [showNumbers, setShowNumbers] = useState(false);
+  const [queueStatus, setQueueStatus] = useState<ReviewStatus | 'all'>('pending'), [query, setQuery] = useState('');
+  const [selectedId, setSelectedId] = useState('OBS-004'), [count, setCount] = useState(''), [reviewNote, setReviewNote] = useState('');
+  const [reviewError, setReviewError] = useState(''), [showGuides, setShowGuides] = useState(false);
+  const [image, setImage] = useState<{ name: string; url: string } | null>(null);
+  const imageInput = useRef<HTMLInputElement>(null);
+  const observations = useMemo(() => filteredObservations(state, locationId, weeks), [state, locationId, weeks]);
+  const series = useMemo(() => caseSeries(locationId, weeks), [locationId, weeks]);
+  const locations = LOCATIONS.filter(l => locationId === 'all' || l.id === locationId);
+  const pending = observations.filter(o => o.status === 'pending'), reviewed = observations.filter(o => o.status === 'reviewed');
+  const last = series.at(-1)!, previous = series.at(-2)!;
+  const queue = observations.filter(o => (queueStatus === 'all' || o.status === queueStatus) && (o.id + ' ' + o.container + ' ' + locationName(o.locationId)).toLowerCase().includes(query.toLowerCase().trim())).sort((a,b) => Number(a.status !== 'pending') - Number(b.status !== 'pending') || b.capturedAt.localeCompare(a.capturedAt));
+  const selected = queue.find(o => o.id === selectedId) || queue[0];
+  const totalCases = series.reduce((sum,p) => sum+p.cases, 0), reviewedPercentage = observations.length ? reviewed.length / observations.length * 100 : 0;
 
-export default App;
+  useLayoutEffect(() => { window.scrollTo({ top: 0 }); }, [view]);
+  useEffect(() => {
+    const hash = () => { const next = window.location.hash.slice(1) as View; if (VIEWS.includes(next)) { setView(next); window.scrollTo({ top: 0 }); } setMobileNav(false); };
+    const connection = () => setOnline(navigator.onLine), cache = () => setCacheFailed(true);
+    window.addEventListener('hashchange', hash); window.addEventListener('online', connection); window.addEventListener('offline', connection); window.addEventListener('workshop-cache-error', cache);
+    return () => { window.removeEventListener('hashchange', hash); window.removeEventListener('online', connection); window.removeEventListener('offline', connection); window.removeEventListener('workshop-cache-error', cache); };
+  }, []);
+  useEffect(() => { try { localStorage.setItem(DASHBOARD_KEY, JSON.stringify(state)); setSaveFailed(false); } catch { setSaveFailed(true); } }, [state]);
+  useEffect(() => { if (!toast) return; const timer = window.setTimeout(() => setToast(''), 5000); return () => window.clearTimeout(timer); }, [toast]);
+  useEffect(() => () => { if (image) URL.revokeObjectURL(image.url); }, [image]);
+  const editNote = selected ? state.reviews[selected.id]?.note || '' : '';
+  useEffect(() => {
+    setCount(selected ? String(selected.reviewedCount ?? selected.estimate) : ''); setReviewNote(editNote); setReviewError(''); setImage(null); setShowGuides(false);
+  }, [selected?.id, selected?.reviewedCount, selected?.estimate, editNote]);
+
+  function navigate(next: View) { window.location.hash = next; setView(next); setMobileNav(false); window.scrollTo({ top: 0 }); }
+  function openObservation(o: Observation) { setQueueStatus('all'); setQuery(''); setSelectedId(o.id); navigate('review'); }
+  function exportObservations() { downloadFile('wolbachia-synthetic-observations.csv', observationCsv(observations)); setToast('Exported filtered sample records with synthetic-data labels.'); }
+  function exportCases() {
+    const rows: (string | number)[][] = [['dataset','provenance','location','week','reported_cases']];
+    for (const l of locations) for (const p of caseSeries(l.id, weeks)) rows.push([DATASET_ID,'synthetic_demo',l.name,p.week,p.cases]);
+    downloadFile('wolbachia-synthetic-case-records.csv', rows.map(row => row.map(csvCell).join(',')).join('\r\n'));
+  }
+  function saveReview(status: 'reviewed' | 'rejected') {
+    if (!selected || image) return;
+    try {
+      const reviewedCount = status === 'reviewed' ? validateReviewCount(count) : null;
+      if (status === 'rejected' && !reviewNote.trim()) throw new Error('Add a short reason before rejecting this demo record.');
+      setState(current => ({ ...current, reviews: { ...current.reviews, [selected.id]: { status, count: reviewedCount, note: reviewNote.trim(), reviewedAt: new Date().toISOString() } } }));
+      setReviewError(''); setToast(selected.container + ': demo review saved in this browser.');
+    } catch (err) { setReviewError(err instanceof Error ? err.message : 'The review could not be saved.'); }
+  }
+  function previewImage(file?: File) {
+    setReviewError(''); if (!file) return;
+    if (!['image/jpeg','image/png','image/webp'].includes(file.type) || file.size > 8*1024*1024) { setReviewError('Choose a JPG, PNG or WebP image up to 8 MB.'); return; }
+    setImage({ name: file.name, url: URL.createObjectURL(file) });
+  }
+  async function checkDevice() { setChecking(true); try { setCapacity(await readBrowserCapacity()); } catch { setToast('The browser could not provide a capacity reading.'); } finally { setChecking(false); } }
+  function toggleFollowUp(id: string) { setState(current => ({ ...current, followUps: current.followUps.includes(id) ? current.followUps.filter(l => l !== id) : [...current.followUps, id] })); }
+  function observationTable(rows: Observation[], limit?: number) {
+    const shown = limit ? rows.slice(0, limit) : rows;
+    return <div className="table-scroll"><table><thead><tr><th>Container / location</th><th>Captured</th><th className="numeric">Sample estimate</th><th className="numeric">Reviewed count</th><th>Status</th><th><span className="sr-only">Action</span></th></tr></thead><tbody>{shown.map(o => <tr key={o.id}><td><strong className="table-id">{o.container}</strong><span className="table-sub">{locationName(o.locationId)} · {o.id}</span></td><td>{shortDate(o.capturedAt)}</td><td className="numeric">{o.estimate}</td><td className="numeric">{o.reviewedCount ?? '—'}</td><td><Badge status={o.status}/></td><td><button className="table-link" onClick={() => openObservation(o)}>Open</button></td></tr>)}</tbody></table>{!shown.length && <div className="empty-state">No observations match these filters.</div>}</div>;
+  }
+  function trendPanel() {
+    return <section className="panel trend-panel"><PanelTitle title="Reported dengue cases" subtitle="Synthetic weekly counts · observed, not predicted" action={<button className="subtle-button" onClick={() => setShowNumbers(v => !v)}>{showNumbers ? 'Hide numbers' : 'View numbers'}</button>}/><CaseChart series={series}/>{showNumbers && <div className="table-scroll chart-data"><table><thead><tr><th>Week starting</th><th className="numeric">Synthetic cases</th></tr></thead><tbody>{series.map(p => <tr key={p.week}><td>{shortDate(p.week,true)}</td><td className="numeric">{p.cases}</td></tr>)}</tbody></table></div>}<div className="panel-foot"><span><span className="mini-line"/>Weekly reported cases</span><span>Observed change does not establish intervention impact.</span></div></section>;
+  }
+  function overview() {
+    return <>
+      <div className="metric-grid">
+        <article className="metric"><div><span>Locations in view</span><Icon name="pin" size={18}/></div><strong>{locations.length.toString().padStart(2,'0')}</strong><p>Fictional release locations</p></article>
+        <article className="metric"><div><span>Container observations</span><Icon name="layers" size={18}/></div><strong>{observations.length}</strong><p>{reviewed.length} reviewed · {observations.filter(o => o.status === 'rejected').length} rejected</p></article>
+        <article className="metric"><div><span>Awaiting review</span><Icon name="clock" size={18}/></div><strong>{pending.length.toString().padStart(2,'0')}</strong><p><button className="inline-link" onClick={() => { setQueueStatus('pending'); navigate('review'); }}>Open the review queue</button></p></article>
+        <article className="metric"><div><span>Latest weekly cases</span><Icon name="chart" size={18}/></div><strong>{last.cases}</strong><p>{changeLabel(last.cases,previous.cases)}</p></article>
+      </div>
+      <div className="overview-grid">{trendPanel()}<section className="panel review-summary"><PanelTitle title="Review progress" subtitle="Human checks on sample observations"/><div className="review-donut" role="img" aria-label={reviewed.length + ' of ' + observations.length + ' sample observations reviewed'} style={{ background: 'conic-gradient(#148478 0% ' + reviewedPercentage + '%, #e9eef2 ' + reviewedPercentage + '% 100%)' }}><div><strong>{Math.round(reviewedPercentage)}<small>%</small></strong><span>reviewed</span></div></div><div className="review-legend"><span><i className="legend-dot reviewed-dot"/>Reviewed <strong>{reviewed.length}</strong></span><span><i className="legend-dot pending-dot"/>To review <strong>{pending.length}</strong></span><span><i className="legend-dot rejected-dot"/>Rejected <strong>{observations.filter(o => o.status === 'rejected').length}</strong></span></div><button className="button secondary full-width" onClick={() => { setQueueStatus('pending'); navigate('review'); }}>Continue reviewing</button></section></div>
+      <section className="panel"><PanelTitle title="Review queue" subtitle="Sample estimates need a human check before use" action={<button className="subtle-button" onClick={() => { setQueueStatus('all'); navigate('review'); }}>View all observations</button>}/>{observationTable([...pending].sort((a,b) => b.capturedAt.localeCompare(a.capturedAt)),5)}<div className="panel-foot"><span>Sample estimates are fixtures. No image AI has run.</span><span>{pending.length} awaiting review</span></div></section>
+      <section className="next-build-note"><div className="note-icon"><Icon name="flask" size={20}/></div><div><strong>From observation to field decision</strong><p>Image counting, evaluated prediction and generated planning recommendations are the next build stages.</p></div><button className="subtle-button" onClick={() => navigate('trends')}>View modelling scope</button></section>
+    </>;
+  }
+  function reviewView() {
+    return <>
+      <div className="review-toolbar"><div className="segmented" aria-label="Filter review status">{(['pending','all','reviewed','rejected'] as const).map(status => <button key={status} className={queueStatus === status ? 'active' : ''} aria-pressed={queueStatus === status} onClick={() => setQueueStatus(status)}>{status === 'all' ? 'All records' : STATUS[status]}<span>{status === 'all' ? observations.length : observations.filter(o => o.status === status).length}</span></button>)}</div><div className="search-input"><Icon name="search" size={17}/><input aria-label="Search container or location" placeholder="Find container or location" value={query} onChange={e => setQuery(e.target.value)}/></div></div>
+      <div className="image-review-layout"><section className="panel queue-panel"><div className="queue-heading"><h2>Observations</h2><span className="muted">{queue.length} records</span></div><div className="observation-list">{queue.map(o => <button className={'observation-item ' + (selected?.id === o.id ? 'selected' : '')} key={o.id} onClick={() => { setSelectedId(o.id); setImage(null); }} aria-pressed={selected?.id === o.id}><span className="queue-thumb"><Icon name="image" size={22}/></span><span className="observation-detail"><strong>{o.container}</strong><span>{locationName(o.locationId)} · {shortDate(o.capturedAt)}</span><Badge status={o.status}/></span></button>)}{!queue.length && <div className="empty-state"><Icon name="check" size={24}/><strong>No matching records</strong><p>Change the status or search filter.</p><button className="subtle-button" onClick={() => { setQueueStatus('all'); setQuery(''); }}>Show all records</button></div>}</div></section>
+      <section className="panel image-panel"><PanelTitle title={selected?.container || 'Image workspace'} subtitle={selected ? locationName(selected.locationId) + ' · ' + shortDate(selected.capturedAt,true) : 'Choose an observation to begin'} action={<span className="tag">{image ? 'Local preview' : 'Sample illustration'}</span>}/><div className="image-stage" onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); previewImage(e.dataTransfer.files[0]); }}>
+        {image ? <img src={image.url} alt={'Local preview: ' + image.name} onError={() => setReviewError('This image could not be displayed. Try a different image file.')}/> : selected ? <BeadSample count={selected.beadCount} seed={Number(selected.id.slice(-3))} showGuides={showGuides}/> : <div className="empty-state"><Icon name="image" size={36}/><p>Select an observation or preview your image.</p></div>}
+      </div><div className="image-stage-footer"><span>{image ? image.name : 'Bead proxy · not a larva photograph'}</span>{!image && selected && <label className="checkbox-label"><input type="checkbox" checked={showGuides} onChange={e => setShowGuides(e.target.checked)}/>Illustration guides</label>}{image && <button className="table-link" onClick={() => { setImage(null); if (imageInput.current) imageInput.current.value = ''; }}>Clear preview</button>}</div><div className="upload-row"><input type="file" className="sr-only" ref={imageInput} accept="image/jpeg,image/png,image/webp" aria-label="Choose an image to preview locally" onChange={e => previewImage(e.target.files?.[0])}/><button className="button secondary" onClick={() => imageInput.current?.click()}><Icon name="upload" size={16}/>Preview your image</button><span className="helper">JPG, PNG, WebP · up to 8 MB · stays in this tab</span></div><p className="image-caption">{image ? 'Preview only. This image has not been uploaded, saved or analysed. Live counting is not connected in this build.' : 'This diagram and its reference positions are predefined demonstration material. The count shown alongside it is a fixture, not an AI response.'}</p></section>
+      <section className="panel decision-panel"><PanelTitle title="Count review" subtitle={image ? 'New image · not analysed' : 'Demonstration record'}/><div className="estimate-box"><span>{image ? 'Image estimate' : 'Sample estimate'}</span><strong>{image ? '—' : selected?.estimate ?? '—'}</strong><span>{image ? 'Counting is not connected yet' : 'Predefined fixture · no AI request'}</span></div><div className="review-form"><label htmlFor="review-count">Reviewed count</label><input id="review-count" inputMode="numeric" value={image ? '' : count} disabled={!selected || !!image} onChange={e => setCount(e.target.value)} placeholder="Whole-number count"/><label htmlFor="review-note">Review note <span>Optional for acceptance</span></label><textarea id="review-note" value={image ? '' : reviewNote} onChange={e => setReviewNote(e.target.value)} disabled={!selected || !!image} maxLength={500} placeholder="Record a correction or rejection reason…" rows={3}/>{reviewError && <p className="form-error" role="alert">{reviewError}</p>}<button className="button primary full-width" disabled={!selected || !!image} onClick={() => saveReview('reviewed')}><Icon name="check" size={17}/>Save demo review</button><button className="button secondary full-width" disabled={!selected || !!image} onClick={() => saveReview('rejected')}>Reject demo record</button></div><div className="review-trace"><Icon name="info" size={16}/><p>Demo reviews update the overview and stay in this browser. Original sample estimates are retained.</p></div></section></div>
+    </>;
+  }
+  function trends() {
+    const change = percentChange(last.cases,series[0].cases);
+    return <><div className="metric-grid trends-metrics"><article className="metric"><div><span>Cases in selected period</span><Icon name="layers" size={18}/></div><strong>{totalCases}</strong><p>Sum of synthetic reported cases</p></article><article className="metric"><div><span>First-to-latest week</span><Icon name="chart" size={18}/></div><strong>{change === null ? '—' : change.toFixed(1) + '%'}</strong><p>Observed change · no causal claim</p></article><article className="metric"><div><span>Next-week prediction</span><Icon name="flask" size={18}/></div><strong>—</strong><p>Model has not been trained</p></article></div>{trendPanel()}<div className="two-columns"><section className="panel"><PanelTitle title="Prediction workbench" subtitle="Implementation planned · no model result" action={<span className="tag">Not run</span>}/><dl className="definition-list"><div><dt>Proposed target</dt><dd>Next-week reported case rate</dd></div><div><dt>Candidate inputs</dt><dd>Lagged cases, reviewed observations, dated intervention records</dd></div><div><dt>Baseline to compare</dt><dd>Previous-week value</dd></div><div><dt>Evaluation to report</dt><dd>Chronological holdout · MAE</dd></div></dl><div className="inset-note">A forecast will appear only after an actual model run and evaluation. Synthetic results will remain labelled.</div></section><section className="panel"><PanelTitle title="Hypothesis testing" subtitle="Exploratory association · implementation planned" action={<span className="tag">Not run</span>}/><div className="hypothesis-body"><span className="mini-label">EXAMPLE RESEARCH QUESTION</span><p>Are reviewed container observations associated with subsequent reported case rates in the demonstration data?</p><div className="result-placeholder"><span>Effect estimate</span><strong>—</strong><span>p-value</span><strong>—</strong></div><p className="helper">The test, assumptions and treatment of repeated observations must be specified first. An association alone cannot establish dengue reduction caused by deployment.</p></div></section></div><section className="panel"><PanelTitle title="Location comparison" subtitle={'Latest two weeks · ' + shortDate(previous.week) + ' and ' + shortDate(last.week)} action={<DownloadButton onClick={exportCases}>Export case data</DownloadButton>}/><div className="table-scroll"><table><thead><tr><th>Location</th><th className="numeric">Previous week</th><th className="numeric">Latest week</th><th className="numeric">Observed change</th><th className="numeric">Population, mock</th></tr></thead><tbody>{locations.map(l => <tr key={l.id}><td><strong>{l.name}</strong><span className="table-sub">{l.sector} sector · fictional</span></td><td className="numeric">{l.cases.at(-2)}</td><td className="numeric">{l.cases.at(-1)}</td><td className="numeric">{changeLabel(l.cases.at(-1)!,l.cases.at(-2)!).replace(' vs prior week','')}</td><td className="numeric">{l.population.toLocaleString()}</td></tr>)}</tbody></table></div></section></>;
+  }
+  function planning() {
+    return <><div className="planning-intro"><Icon name="info" size={20}/><p><strong>Manual demonstration planning.</strong> The signals below come from sample records. They are not model-generated deployment recommendations.</p><span className="tag">{state.followUps.length} on follow-up list</span></div><div className="location-grid">{locations.map(l => {
+      const waiting = observations.filter(o => o.locationId === l.id && o.status === 'pending').length, change = percentChange(l.cases.at(-1)!,l.cases.at(-2)!);
+      return <article className={'panel location-card ' + (state.followUps.includes(l.id) ? 'in-plan' : '')} key={l.id}><div className="location-heading"><span className="location-icon"><Icon name="pin" size={22}/></span><div><h2>{l.name}</h2><p>{l.sector} sector · mock location</p></div><span className="location-code">{l.id}</span></div><div className="location-values"><div><span>Latest cases</span><strong>{l.cases.at(-1)}</strong></div><div><span>To review</span><strong>{waiting}</strong></div><div><span>Week change</span><strong>{change === null ? '—' : (change > 0 ? '+' : '') + change.toFixed(0) + '%'}</strong></div></div><div className="location-signal"><span className="mini-label">RECORD SIGNALS</span><p>{waiting ? waiting + ' container observations awaiting review.' : 'No observations awaiting review in this selection.'} {change !== null && change > 0 ? 'Synthetic reported cases increased from the prior week.' : 'Inspect reporting completeness before interpreting the case trend.'}</p></div><div className="mock-coordinates">Mock coordinates: {l.coordinates.map(n => n.toFixed(3)).join(', ')}</div><button className={'button full-width ' + (state.followUps.includes(l.id) ? 'selected-button' : 'secondary')} onClick={() => toggleFollowUp(l.id)} aria-pressed={state.followUps.includes(l.id)}>{state.followUps.includes(l.id) && <Icon name="check" size={16}/>} {state.followUps.includes(l.id) ? 'On demo follow-up list' : 'Add to demo follow-up'}</button></article>;
+    })}</div><section className="panel"><PanelTitle title="Before real deployment" subtitle="Future field phase"/><div className="field-scope">{[
+      ['Validate the observations','Use real images, reliable counts and dated laboratory or intervention records where needed.'],
+      ['Evaluate the planning method','Check predictive performance, missing data and operating constraints with researchers.'],
+      ['Obtain human approval','Field deployment decisions belong with the responsible health programme.'],
+    ].map(([title,text],i) => <div key={title}><span className="scope-number">{i+1}</span><div><strong>{title}</strong><p>{text}</p></div></div>)}</div></section></>;
+  }
+  function dataSettings() {
+    return <div className="settings-layout"><div className="settings-main"><section className="panel"><PanelTitle title="Processing preference" subtitle="Cloud is the starting point for this laptop"/><div className="settings-content"><label htmlFor="processing-mode">Where should AI run?</label><div className="select-wrap"><Icon name={state.mode === 'local' || state.mode === 'hybrid' ? 'device' : 'cloud'} size={18}/><select id="processing-mode" value={state.mode} onChange={e => setState(current => ({ ...current, mode: e.target.value as ProcessingMode }))}>{Object.entries(MODE_LABELS).map(([value,label]) => <option value={value} key={value}>{label}</option>)}</select><Icon name="chevron" size={16}/></div><p className="helper">{state.mode === 'local' ? 'Device-only never permits a cloud fallback. This interface does not yet run image inference.' : state.mode === 'cloud' ? 'Cloud-only avoids preparing a local model. Live image requests will follow the image adapter and Firebase setup.' : 'This preference permits fallback. Each task will need its own capability check before live routing is enabled.'}</p><div className="settings-status"><Icon name="cloud" size={17}/><span>No image AI request has run in this build.</span></div></div></section><section className="panel" id="firebase-settings"><PanelTitle title="Firebase connection" subtitle="AI Logic + App Check" action={<span className="tag">{settings ? 'Configuration saved · unverified' : 'Set up later'}</span>}/><FirebaseForm settings={settings} onSave={value => { setSettings(value); setToast('Firebase configuration saved. A live connection has not been tested.'); }}/></section><section className="panel"><PanelTitle title="Demonstration data" subtitle="Transparent inputs for interface testing"/><div className="settings-content"><dl className="definition-list"><div><dt>Dataset</dt><dd>{DATASET_ID}</dd></div><div><dt>Locations and cases</dt><dd>Fictional locations · synthetic weekly counts</dd></div><div><dt>Image material</dt><dd>Bead illustrations used as larva proxies</dd></div><div><dt>Your changes</dt><dd>Demo reviews and follow-up choices, saved on this browser</dd></div></dl><div className="button-row"><DownloadButton onClick={exportObservations}>Export observations</DownloadButton><DownloadButton onClick={exportCases}>Export case data</DownloadButton></div><button className="reset-button" onClick={() => { setState(current => ({ ...current, reviews: {}, followUps: [] })); setToast('Demo changes reset. Firebase settings and processing preference were kept.'); }}>Reset demo changes</button></div></section></div><aside className="settings-aside"><section className="panel"><PanelTitle title="Device capacity" subtitle="Read only, on your click"/><div className="settings-content"><p className="helper">Browser measurements are limited. They do not expose exact spare system RAM or establish support for image inference.</p><button className="button secondary full-width" onClick={checkDevice} disabled={checking}><Icon name="device" size={17}/>{checking ? 'Reading…' : capacity ? 'Refresh device reading' : 'Check this browser'}</button>{capacity && <><dl className="capacity-list"><div><dt>RAM estimate</dt><dd>{capacity.approximateMemoryGiB === null ? 'Not exposed' : '≈ ' + capacity.approximateMemoryGiB + ' GiB'}</dd></div><div><dt>Logical processors</dt><dd>{capacity.logicalProcessors ?? 'Not exposed'}</dd></div><div><dt>Free system RAM</dt><dd>Not exposed</dd></div><div><dt>Site storage use</dt><dd>{formatCapacityBytes(capacity.storageUsageBytes)}</dd></div><div><dt>Site storage quota</dt><dd>{formatCapacityBytes(capacity.storageQuotaBytes)}</dd></div><div><dt>Text model readiness</dt><dd>{capacity.localModel}</dd></div></dl><p className="helper">Site quota is not free disk. Text-model readiness does not establish image capability. This reading stays in the browser.</p></>}</div></section><section className="panel"><PanelTitle title="Build status"/><div className="settings-content build-checklist"><span><Icon name="check" size={16}/>Dashboard & sample workflow</span><span><Icon name="clock" size={16}/>Live image counting</span><span><Icon name="clock" size={16}/>Evaluated ML & hypothesis tests</span><span><Icon name="clock" size={16}/>Generated planning recommendations</span><span><Icon name="clock" size={16}/>Verified Firebase connection</span></div></section></aside></div>;
+  }
+  return <div className="dashboard-app">
+    <a className="skip-link" href="#main-content">Skip to dashboard content</a>
+    {mobileNav && <button className="nav-scrim" aria-label="Close navigation" onClick={() => setMobileNav(false)}/>}
+    <aside className={'sidebar ' + (mobileNav ? 'is-open' : '')} aria-label="Main navigation"><a className="brand" href="#overview" onClick={() => setMobileNav(false)}><span className="brand-mark"><Icon name="layers" size={25}/></span><span>Wolbachia<strong>Field Review</strong></span></a><div className="workspace-label"><span className="workspace-symbol">D</span><div><strong>Demo district</strong><span>Demonstration workspace</span></div></div><span className="nav-section-label">WORKSPACE</span><nav>{NAV.map(item => <a key={item.id} href={'#'+item.id} className={'nav-item '+(view === item.id ? 'active' : '')} aria-current={view === item.id ? 'page' : undefined} onClick={() => setMobileNav(false)}><Icon name={item.icon} size={19}/>{item.name}{item.id === 'review' && pending.length > 0 && <span className="nav-count">{pending.length}</span>}</a>)}</nav><div className="sidebar-bottom"><div className="sidebar-build"><Icon name="flask" size={18}/><div><strong>Research prototype</strong><p>Interface build · Step 2</p></div></div><div className="sidebar-person"><span className="avatar">WK</span><div><strong>Demo operator</strong><span>Browser-local workspace</span></div></div></div></aside>
+    <div className="main-column"><header className="topbar"><div className="breadcrumb"><button className="icon-button menu-button" aria-label="Open navigation" aria-expanded={mobileNav} onClick={() => setMobileNav(v => !v)}><Icon name="menu"/></button><span>Programme workspace</span><span className="breadcrumb-separator">/</span><strong>{NAV.find(n => n.id === view)?.name}</strong></div><div className="topbar-right"><span className={'connection-state '+(online ? '' : 'offline')}><i/>{online ? 'Browser online' : 'Browser offline'}</span><button className="topbar-settings" onClick={() => navigate('settings')} aria-label="Open data and settings"><Icon name="settings" size={19}/></button><span className="avatar top-avatar">WK</span></div></header>
+    <main id="main-content" className="main-content" tabIndex={-1}><div className="demo-banner"><span className="demo-label"><Icon name="flask" size={15}/>DEMO DATA</span><p>Synthetic locations and case records. Bead illustrations stand in for larvae. No live AI results.</p><button onClick={() => navigate('settings')}>About the data</button></div>{saveFailed && <p className="storage-warning" role="alert">Browser storage is unavailable. Changes last only in this open tab; export records before leaving.</p>}{cacheFailed && <p className="storage-warning" role="alert">Offline page caching was unavailable. Browser-local data storage is separate.</p>}
+      <div className="page-heading"><div><span className="eyebrow">WOLBACHIA OPERATIONS · PROTOTYPE</span><h1>{TITLES[view][0]}</h1><p>{TITLES[view][1]}</p></div><div className="heading-actions">{view === 'overview' || view === 'review' ? <DownloadButton onClick={exportObservations}>Export sample data</DownloadButton> : null}<button className="button primary" onClick={() => navigate(view === 'settings' ? 'overview' : 'settings')}>{view === 'settings' ? 'Back to overview' : settings ? 'Firebase settings' : 'Set up Firebase'}</button></div></div>
+      {view !== 'settings' && <div className="filter-bar"><div className="filter-controls"><div className="filter-select"><Icon name="pin" size={16}/><label className="sr-only" htmlFor="location-filter">Location</label><select id="location-filter" value={locationId} onChange={e => setLocationId(e.target.value)}><option value="all">All demo locations</option>{LOCATIONS.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}</select><Icon name="chevron" size={15}/></div><div className="filter-select"><Icon name="clock" size={16}/><label className="sr-only" htmlFor="week-filter">Date range</label><select id="week-filter" value={weeks} onChange={e => setWeeks(Number(e.target.value))}><option value="12">Last 12 weeks</option><option value="8">Last 8 weeks</option><option value="4">Last 4 weeks</option></select><Icon name="chevron" size={15}/></div><span className="filter-date">{shortDate(WEEKS[12-weeks])} – {shortDate(PERIOD_END,true)}</span></div><button className="runtime-chip" onClick={() => navigate('settings')}><Icon name={state.mode === 'local' ? 'device' : 'cloud'} size={16}/>{state.mode === 'cloud' ? 'Cloud default' : state.mode === 'local' ? 'Device only' : state.mode === 'cloud-first' ? 'Cloud preferred' : 'Device preferred'}<span>· {settings ? 'Config unverified' : 'AI not connected'}</span></button></div>}
+      <div className="page-body">{view === 'overview' ? overview() : view === 'review' ? reviewView() : view === 'trends' ? trends() : view === 'planning' ? planning() : dataSettings()}</div>
+      <footer className="workspace-footer"><span><Icon name={saveFailed ? 'info' : 'check'} size={14}/>{saveFailed ? 'Changes are temporary in this tab' : 'Demo changes saved on this browser'}</span><span>Independent prototype · no field deployment</span></footer>
+    </main></div>
+    {toast && <div className="toast" role="status"><Icon name="check" size={18}/><span>{toast}</span><button className="icon-button" onClick={() => setToast('')} aria-label="Dismiss notification"><Icon name="close" size={16}/></button></div>}
+  </div>;
+}

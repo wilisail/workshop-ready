@@ -1,9 +1,9 @@
 {
   "name": "workshop-ready",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
-  "description": "Workshop notes into Ready, Blocked and Next actions, with Firebase hybrid inference and cloud-first testing.",
+  "description": "Wolbachia release-container review and field planning dashboard, using synthetic data with cloud-first AI integration planned.",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",

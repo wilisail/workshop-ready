@@ -1,10 +1,10 @@
 {
-  "name": "WorkshopReady",
-  "short_name": "WorkshopReady",
-  "description": "A clear next step from rough workshop notes.",
+  "name": "Wolbachia Field Review",
+  "short_name": "Field Review",
+  "description": "Release-container review and field planning research prototype.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f6f5f0",
-  "theme_color": "#f6f5f0",
+  "background_color": "#f4f6f9",
+  "theme_color": "#142336",
   "icons": [{"src":"/favicon.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}]
 }
