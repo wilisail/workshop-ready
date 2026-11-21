@@ -36,6 +36,8 @@ Supabase is optional future shared storage and user access, not required for ima
 
 ## Verification
 
+The compiled-server smoke check emits the Node API and its shared module as JavaScript, imports the emitted entrypoint and counts a real pixel request. Relative TypeScript imports are rewritten to the emitted JavaScript extensions, preventing the initial production module-resolution error.
+
 The automated suite covers known dark/light/colour pixel examples; ROI; zero warnings; clipped/oversized refusal; bounds and larvae rejection; cloud/device-only and allowed fallbacks; cancellation and integrity errors; actual HTTP pixel computation and hashes; invalid/oversized/cross-origin requests; demo rate limiting; and generated-proxy/runtime history through reopening and export. Existing QA, study, model and inspection tests remain in the suite.
 
 All 97 automated checks and the TypeScript/Vite production build passed. Preview browser QA counted all eight generated objects through both the actual development HTTP handler and the browser worker; their distinct runtime labels were preserved. A reviewed zero correction survived reload, a rerun retained history and required a fresh review, and the displayed region boxes matched the example. With counting controls expanded in a 390 px frame, usable/document/body widths were all 375 px with no page overflow. The responsive harness was removed before packaging. Production verification is reported with the deployment result. Real-photo error measurements, biological validation and cold offline reopening remain pending.
