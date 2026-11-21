@@ -1,4 +1,4 @@
-export type View = 'overview' | 'review' | 'trends' | 'planning' | 'settings';
+export type View = 'overview' | 'review' | 'containers' | 'trends' | 'planning' | 'settings';
 export type ReviewStatus = 'pending' | 'reviewed' | 'rejected';
 export type ProcessingMode = 'cloud' | 'cloud-first' | 'hybrid' | 'local';
 
@@ -35,7 +35,7 @@ export interface DashboardState {
 }
 export const DASHBOARD_KEY = 'wolbachia-field-review:workspace:v1';
 export const DATASET_ID = 'synthetic-workspace-v1';
-export const VIEWS: View[] = ['overview', 'review', 'trends', 'planning', 'settings'];
+export const VIEWS: View[] = ['overview', 'review', 'containers', 'trends', 'planning', 'settings'];
 export const MODE_LABELS: Record<ProcessingMode, string> = {
   cloud: 'Cloud only — default',
   'cloud-first': 'Prefer cloud, allow device fallback',

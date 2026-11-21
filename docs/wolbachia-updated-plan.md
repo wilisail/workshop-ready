@@ -17,7 +17,7 @@ The submission demonstration remains cloud-first, using prepared bead photograph
 - Saved image import, manual review, Firebase image adapter, routing guards and analysis/review history are implemented. Actual photo accuracy and live Firebase/App Check remain unverified and owner testing is deferred.
 - This release applies a Lotus Notes-inspired presentation: muted blue/lavender and gray, a title strip, working view tabs, compact rectangular panels, table grids and a status bar. Existing image storage and inference behavior are retained.
 - The planned workbench copy now describes container-performance analysis. It still shows no trained model, test result or prediction.
-- Container-QA records, study setup, numeric ML, generated inspection suggestions and study-review reports are not implemented by the visual refresh.
+- Container-QA records are implemented in step 4A, including explicit unknowns, provenance, separately entered outcomes and revision/export support. Guided study setup, numeric ML, generated inspection suggestions and study-review reports remain pending. See `wolbachia-step-4a.md`.
 
 ## Updated steps
 
@@ -28,7 +28,7 @@ Effort is an estimate of active project time, not elapsed calendar time or a com
 | 1 | Baseline and method check: retain the repo and anchor the use case to published release-container QA | Assistant | Complete | — |
 | 2 | Dashboard and Lotus Notes-inspired visual refresh | Assistant | Implemented in this release | — |
 | 3 | Prepared-photo test: known bead counts, AI estimates, corrections, persistence and exports | User operates; assistant compares/fixes | Code implemented; real test deferred | 0.5–1 |
-| 4A | Container-QA records: batch/setup dates, stage counts, condition, measured temperature/source and independently checked outcomes | Assistant | Next | 2–3 |
+| 4A | Container-QA records: batch/setup dates, stage counts, condition, measured temperature/source and independently checked outcomes | Assistant | Implemented and checked | — |
 | 4B | Study setup/review: two focused templates, outcome/unit/comparator, sampling rationale, a dated plan, checks and review export | Assistant; user reviews wording | Planned | 3–5 |
 | 4C | Numeric ML/evaluation: container-performance target, simple baseline, held-out containers/dates and appropriate error/uncertainty reporting | Assistant | Planned | 4–6 |
 | 5 | Inspection planning/report: evidence-linked priorities, missing data, reasons and recorded human decisions | Assistant; user checks flow | Manual demo list exists; generated workflow planned | 2–3 |
@@ -36,9 +36,9 @@ Effort is an estimate of active project time, not elapsed calendar time or a com
 | 7 | End-to-end QA and submission: rehearse, review current rules and judging access, prepare video and submission materials | Assistant prepares; user records/submits | Pending | 3–4 |
 | Buffer | Correct observed image, data, integration, layout or deployment failures | Both | Reserved | 4–6 |
 
-Remaining work: approximately 17–25 hours, or 21–31 hours including buffer. These ranges exclude physical assembly, field studies, publication work, a complete general-purpose statistical adviser and any newly discovered contest/platform changes.
+Remaining work after 4A: approximately 15–22 hours, or 19–28 hours including buffer. These ranges exclude physical assembly, field studies, publication work, a complete general-purpose statistical adviser and any newly discovered contest/platform changes.
 
-Work order: 4A → 4B → 4C → 5 → 6 → 7. Step 3 testing can take place alongside these stages once Firebase is connected. Its allowance covers owner-operated tests and interpretation; step 6 covers project/domain configuration and integration verification. No setup or photographs are required from the owner to implement 4A–4B.
+Next work order: 4B → 4C → 5 → 6 → 7. Step 3 testing can take place alongside these stages once Firebase is connected. Its allowance covers owner-operated tests and interpretation; step 6 covers project/domain configuration and integration verification. No setup or photographs are required from the owner to implement 4A–4B.
 
 ## 4A acceptance boundary
 
