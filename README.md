@@ -2,9 +2,9 @@
 
 A cloud-first research prototype for reviewing release-container observations, exploring case trends and preparing follow-ups.
 
-The repository remains `wilisail/workshop-ready`. **Step 4B is implemented:** two study templates, dated plan versions, pinned input snapshots, deterministic descriptive/readiness checks and review exports now accompany container QA and saved-image review. Real-photo tests and live Firebase verification remain deferred. Evaluated ML (4C) and generated planning recommendations are next.
+The repository remains `wilisail/workshop-ready`. **Step 4C is implemented:** a small logistic model, fixed inspection baseline and training-prevalence baseline are evaluated on chronological, held-out container groups. Fitted parameters, exclusions, scores and version-specific reviews are retained. Real-photo tests, live Firebase verification and generated inspection planning remain deferred.
 
-The current presentation follows a Lotus Notes-inspired workbench: muted blue/lavender and gray, working view tabs, compact panels and table grids. The [updated workplan](docs/wolbachia-updated-plan.md) refocuses the next stages on container quality assurance and a reviewable study workflow. The model remains untrained; study setup and review work without Firebase.
+The current presentation follows a Lotus Notes-inspired workbench: muted blue/lavender and gray, working view tabs, compact panels and table grids. The [updated workplan](docs/wolbachia-updated-plan.md) refocuses the next stages on container quality assurance and a reviewable study workflow. Numeric model training and study review work without Firebase. A model is fitted only when you select Train and evaluate; no fixture metrics substitute for training.
 
 ## Try the current interface
 
@@ -16,7 +16,7 @@ The existing private review deployment is https://workshop-ready-wili.williworkm
 | Image review | Saved original photos, image-specific routing checks, Firebase counting adapter, validated human review and audit history; demo fixtures remain on their own tab. |
 | Container QA | Dated stage counts, batch/location references, condition, temperature provenance, separately entered outcomes, revision history and CSV/JSON export. No Firebase is needed for record entry. |
 | Study & review | Counting-accuracy and container-performance planning templates; versioned methods, input snapshots, descriptive/readiness checks, reviewer comments and Markdown/JSON export. |
-| Trends & modelling | Observed changes, case comparison, accessible chart-data table and explicit not-run states for the planned model and hypothesis tests. |
+| Trends & modelling | Actual numeric model training, chronological/grouped evaluation, two baselines, confusion counts, Brier loss, conditional intervals, evidence exports and separate synthetic case context. |
 | Field planning | Sample location signals and a manually selected demo follow-up list. |
 | Data & settings | CSV exports, reset of demo edits, four processing preferences, read-only capacity check and Firebase configuration form. |
 
@@ -29,6 +29,10 @@ Use **Container QA → New QA observation** for the new records, or explicitly l
 Use **Study & review → Create synthetic study example → Run descriptive / readiness check** for a reproducible workflow example. It has six fictional observation rows, four complete pairs, three unit references, one missing pair and one excluded duplicate. Mean absolute error is 1.25 objects; unit-balanced MAE is 1.333 objects. These fixture results do not establish biological accuracy.
 
 Choose **New counting study** to enter your own method/reference count pairs, or **New prediction plan** to select matching-origin QA records. Record a dated plan before capturing its input snapshot. Plan amendments, new snapshots and new runs retain their history and need a fresh review. The primary outcome, sampling justification, reference independence, missing-data handling and repeated-unit checks support review; no universal sample cutoff, p-value, power calculation, confidence interval or automatic validity certificate is supplied. The prediction template checks data readiness; it does not train a model. See [step 4B details](docs/wolbachia-step-4b.md).
+
+Use **Trends & modelling → Create synthetic prediction example → Train and evaluate** for the 4C exercise. The generator creates 100 clearly fictional QA records representing 48 repeated container groups plus four exclusion examples. The fixed split uses 35 earlier training groups and 10 later test groups; 55 input rows are excluded with reasons. No image request, Firebase setup, model download or 16 GB machine is required for this small browser computation.
+
+The fixed example is deliberately reported honestly: model accuracy is 60% versus 50% for the inspection rule and 70% for the training-prevalence baseline. All three miss the three failed test containers. These synthetic results demonstrate evaluation, not useful field prediction. Do not interpret the generated relationships as published Wolbachia effects. See [4C methods, results and independent numerical verification](docs/wolbachia-step-4c.md).
 
 ## Run locally
 
@@ -82,7 +86,7 @@ Never enter service-account keys or App Check debug tokens into the form or repo
 - Imported photos use a separate IndexedDB records/image store; queue reads load metadata only and the selected image is decoded for display. Import checks the image signature, dimensions, file size and SHA-256 hash. The original is saved without resizing.
 - A fresh AI count appends a result instead of replacing prior estimates. It invalidates the previous review for the new analysis version; old reviews remain in history. Wrong-image hashes, stale reviews and cancelled late results are rejected.
 - A model unable to count returns a null estimate rather than an invented zero. Corrections and rejections require a reason. CSV exports preserve upload/model/manual provenance; the JSON audit includes all analyses/reviews but no image bytes.
-- Study plans, pinned datasets, calculations and reviews use their own `wolbachia-field-review:studies:v1` IndexedDB database. Reviewer labels and timestamps are locally entered/generated, not authenticated external certification or preregistration. Export the full JSON audit with the readable methods report; neither includes image bytes.
+- Study plans, pinned datasets, calculations and reviews use their own `wolbachia-field-review:studies:v1` IndexedDB database. Reviewer labels and timestamps are locally entered/generated, not authenticated external certification or preregistration. Export the full JSON audit with the readable methods report; neither includes image bytes. Optional 4C model histories preserve fitted parameters, fixed protocol, exact train/test partitions, scores and metrics. Reviews also bind the current model-run ID; rerunning invalidates the current review without deleting it.
 - Saved image tests do not change the synthetic case charts. Combining them with planning/model features belongs to the next analysis stage. Resetting demo edits does not delete saved photo records.
 - The built service worker retains the application-shell caching mechanism. Reopening the deployed app offline still needs verification; a saved review is not offline AI generation.
 
@@ -95,10 +99,9 @@ The owner-run [terminal readers](docs/capacity-routing.md) and [Qwen learning ex
 ## Next stages
 
 1. Your deferred real-photo tests, Firebase/App Check configuration and live inference verification.
-2. An evaluated container-performance ML example (4C), using pre-outcome inputs, grouped held-out units and a simple baseline.
-3. Evidence-linked inspection priorities, human decisions and a planning report.
-4. Live Firebase/App Check and task-specific routing verification on the deployed domain.
-5. End-to-end checks, public judging access, current contest-rule review and demonstration recording.
+2. Evidence-linked inspection priorities, human decisions and a planning report (step 5).
+3. Live Firebase/App Check and task-specific routing verification on the deployed domain (step 6).
+4. End-to-end checks, public judging access, current contest-rule review and demonstration recording (step 7).
 
 See [step 1 scope](docs/wolbachia-step-1.md), [step 2 implementation notes](docs/wolbachia-step-2.md) and [step 3 implementation/test boundary](docs/wolbachia-step-3.md). Historical workshop setup notes are archived [here](docs/legacy-workshop-readme.md).
 

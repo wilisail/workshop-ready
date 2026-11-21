@@ -1,4 +1,4 @@
-import { appendStudyReview, appendStudyRun, captureStudyDataset, recordStudyPlan, reviseStudyPlan, validateStudy } from './studies.ts';
+import { appendPredictionRun, appendStudyReview, appendStudyRun, captureStudyDataset, recordStudyPlan, reviseStudyPlan, validateStudy } from './studies.ts';
 import type { Study, StudyDataset, StudyPlan, StudyReview } from './studies.ts';
 export const STUDY_DB='wolbachia-field-review:studies:v1';
 export function createStudyStore(factory:IDBFactory,name=STUDY_DB){
@@ -17,6 +17,7 @@ export function createStudyStore(factory:IDBFactory,name=STUDY_DB){
     record(id:string,expected:number){return change(id,expected,s=>recordStudyPlan(s,new Date().toISOString()));},
     capture(id:string,expected:number,data:StudyDataset){return change(id,expected,s=>captureStudyDataset(s,data));},
     run(id:string,expected:number){return change(id,expected,s=>appendStudyRun(s,crypto.randomUUID(),new Date().toISOString()));},
+    predict(id:string,expected:number){return change(id,expected,s=>appendPredictionRun(s,crypto.randomUUID(),new Date().toISOString()));},
     review(id:string,expected:number,input:Pick<StudyReview,'reviewer'|'decision'|'comments'>){return change(id,expected,s=>appendStudyReview(s,{...input,id:crypto.randomUUID(),createdAt:new Date().toISOString()}));},
     async close(){if(opened)(await opened).close();opened=undefined;},
   };

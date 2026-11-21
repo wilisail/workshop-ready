@@ -1,8 +1,10 @@
+import { evaluatePrediction, MODEL_PROTOCOL, MODEL_REFERENCES, MODEL_VERSION, validatePredictionRun } from './prediction.ts';
+import type { PredictionRun } from './prediction.ts';
 import { currentQA, isQADate, ORIGINS, validateQARecord } from './qa-records.ts';
 import type { QAOrigin, QAPayload, QARecord } from './qa-records.ts';
 
 export const STUDY_VERSION = 'study-descriptives-v1';
-export const STUDY_SOFTWARE = '0.5.0';
+export const STUDY_SOFTWARE = '0.6.0';
 export const TEMPLATES = { counting: 'Counting accuracy', prediction: 'Container-performance prediction planning' } as const;
 export const UNITS = { container: 'Container', container_batch: 'Container and release cycle', site: 'Location / site' } as const;
 export const REVIEW_DECISIONS = { comments: 'Comments recorded', changes_requested: 'Changes requested', reviewed: 'Reviewed with stated limitations' } as const;
@@ -23,18 +25,25 @@ export interface CountPair {
   estimate:number|null;reference:number|null;method:string;referenceMethod:string;referenceReviewer:string;
   referenceIndependent:boolean;blinding:'yes'|'no'|'unknown';excluded:boolean;exclusionReason:string;
 }
-export interface StudyDataset {id:string;planRevision:number;capturedAt:string;notes:string;pairs:CountPair[];qaRecords:QARecord[];}
+export interface StudyDataset {id:string;planRevision:number;capturedAt:string;notes:string;pairs:CountPair[];qaRecords:QARecord[];generatorVersion?:string;}
 export interface CountSummary {observations:number;excluded:number;missingPairs:number;validPairs:number;units:number;mae:number|null;bias:number|null;maximumError:number|null;unitBalancedMae:number|null;}
 export interface QASummary {observations:number;units:number;labelled:number;failed:number;satisfactory:number;unresolved:number;missingSetup:number;waterTemperature:number;}
 export interface StudyRun {id:string;planRevision:number;datasetId:string;createdAt:string;algorithmVersion:typeof STUDY_VERSION;softwareVersion:string;counts:CountSummary|null;qa:QASummary|null;checks:string[];}
-export interface StudyReview {id:string;createdAt:string;planRevision:number;datasetId:string|null;runId:string|null;reviewer:string;decision:keyof typeof REVIEW_DECISIONS;comments:string;}
-export interface Study {schemaVersion:1;id:string;createdAt:string;sequence:number;plans:PlanRevision[];datasets:StudyDataset[];runs:StudyRun[];reviews:StudyReview[];}
+export interface StudyReview {id:string;createdAt:string;planRevision:number;datasetId:string|null;runId:string|null;predictionRunId?:string|null;reviewer:string;decision:keyof typeof REVIEW_DECISIONS;comments:string;}
+export interface Study {schemaVersion:1;id:string;createdAt:string;sequence:number;plans:PlanRevision[];datasets:StudyDataset[];runs:StudyRun[];reviews:StudyReview[];predictionRuns?:PredictionRun[];}
 export const latestPlan = (study:Study) => study.plans[study.plans.length-1];
 export const currentDataset = (study:Study) => study.datasets.filter(d=>d.planRevision===latestPlan(study).number).at(-1);
 export const currentRun = (study:Study) => {const d=currentDataset(study);return d?study.runs.filter(r=>r.planRevision===latestPlan(study).number&&r.datasetId===d.id).at(-1):undefined;};
+export const currentPredictionRun = (study:Study) => {const d=currentDataset(study);return d?(study.predictionRuns||[]).filter(r=>r.planRevision===latestPlan(study).number&&r.datasetId===d.id).at(-1):undefined;};
+export function appendPredictionRun(study:Study,id:string,now:string):Study {
+  const p=latestPlan(study),d=currentDataset(study);if(!d)throw new Error('Capture a QA dataset for the current recorded prediction plan first.');
+  if((study.predictionRuns||[]).some(r=>r.id===id))throw new Error('This model run already exists.');
+  if((study.predictionRuns||[]).length>=30)throw new Error('This prototype retains up to 30 model runs per study.');
+  return {...study,sequence:study.sequence+1,predictionRuns:[...(study.predictionRuns||[]),evaluatePrediction(p,d,id,now)]};
+}
 export function currentStudyReview(study:Study):StudyReview|undefined {
   const p=latestPlan(study),d=currentDataset(study),r=currentRun(study);
-  return study.reviews.filter(review=>review.planRevision===p.number&&review.datasetId===(d?.id??null)&&review.runId===(r?.id??null)).at(-1);
+  return study.reviews.filter(review=>review.planRevision===p.number&&review.datasetId===(d?.id??null)&&review.runId===(r?.id??null)&&(review.predictionRunId??null)===(currentPredictionRun(study)?.id??null)).at(-1);
 }
 export function defaultPlan(template:StudyPlan['template']='counting'):StudyPlan {
   return {template,title:template==='counting'?'Counting validation study':'Container-performance planning study',question:template==='counting'?'How close are method counts to independently checked reference counts?':'Can earlier container observations help identify a later failed QA outcome?',primaryOutcome:template==='counting'?'Absolute object-count error against an independently checked reference, in objects.':'Later failed versus satisfactory container QA outcome, assessed separately under a stated protocol.',hypothesis:'',expectedOrigin:template==='counting'?'bead_proxy':'synthetic_demo',unit:'container',plannedUnits:null,comparator:template==='counting'?'Independently checked reference count, with method and reviewer recorded.':'Simple, pre-specified inspection rule; evaluate an ML method later against the same held-out units.',samplingRationale:'',allocation:'',blinding:'',inclusion:'',exclusion:'',analysisPlan:template==='counting'?'Report observation-level MAE, signed bias, maximum error, unit-balanced MAE and missing/excluded pairs. These are descriptive statistics; no p-value or confidence interval is calculated.':'First check labelled outcomes, independent units, missing data and grouping. Specify held-out containers/dates and baseline metrics before training in step 4C.',missingDataPlan:'',repeatedMeasuresPlan:'Identify repeated observations by unit reference. Report observation and unit counts separately; do not treat repeated frames as independent containers.',references:STUDY_REFERENCES.map(r=>r.url).join('\n')};
@@ -77,8 +86,9 @@ export function validateDataset(value:unknown,revision:PlanRevision):StudyDatase
   if(revision.data.template==='counting'?(!pairs.length||qaRecords.length):(!qaRecords.length||pairs.length))throw new Error('Choose the dataset type matching this study template.');
   const origins=[...pairs.map(p=>p.origin),...qaRecords.map(r=>currentQA(r).data.origin)];
   if(origins.some(origin=>origin!==revision.data.expectedOrigin))throw new Error('Every selected record must match the plan data origin. Synthetic, bead-proxy and field records cannot be pooled here.');
+  const generatorVersion=raw.generatorVersion===undefined?undefined:text(raw.generatorVersion,'generator version',100);if(generatorVersion&&revision.data.expectedOrigin!=='synthetic_demo')throw new Error('Generated snapshots must remain synthetic.');
   const id=text(raw.id,'dataset ID',100);if(!id)throw new Error('A dataset ID is required.');
-  return {id,planRevision:revision.number,capturedAt:at(raw.capturedAt),notes:text(raw.notes,'dataset notes'),pairs,qaRecords};
+  return {id,planRevision:revision.number,capturedAt:at(raw.capturedAt),notes:text(raw.notes,'dataset notes'),pairs,qaRecords,...(generatorVersion?{generatorVersion}:{})};
 }
 export function countSummary(pairs:CountPair[]):CountSummary {
   const active=pairs.filter(p=>!p.excluded),valid=active.filter(p=>p.estimate!==null&&p.reference!==null),groups=new Map<string,number[]>();
@@ -144,18 +154,20 @@ export function appendStudyReview(study:Study,review:Pick<StudyReview,'id'|'crea
   const p=latestPlan(study);if(p.status!=='recorded')throw new Error('Record the plan version before reviewing it.');
   const reviewer=text(review.reviewer,'reviewer label',200),comments=text(review.comments,'review comments');if(!reviewer||!comments)throw new Error('Add a reviewer label and substantive comments/limitations.');
   if(study.reviews.some(r=>r.id===review.id))throw new Error('This review already exists.');
-  const full={...review,createdAt:at(review.createdAt),reviewer,comments,decision:choice(review.decision,REVIEW_DECISIONS,'review decision'),planRevision:p.number,datasetId:currentDataset(study)?.id??null,runId:currentRun(study)?.id??null};
+  const full={...review,createdAt:at(review.createdAt),reviewer,comments,decision:choice(review.decision,REVIEW_DECISIONS,'review decision'),planRevision:p.number,datasetId:currentDataset(study)?.id??null,runId:currentRun(study)?.id??null,predictionRunId:currentPredictionRun(study)?.id??null};
   return {...study,sequence:study.sequence+1,reviews:[...study.reviews,full]};
 }
 export function validateStudy(value:unknown):Study {
   const r=obj(value);
   if(r.schemaVersion!==1||typeof r.id!=='string'||!r.id||!Array.isArray(r.plans)||!r.plans.length||!Array.isArray(r.datasets)||!Array.isArray(r.runs)||!Array.isArray(r.reviews))throw new Error('Unsupported saved study format.');
-  if(r.sequence!==r.plans.length+r.datasets.length+r.runs.length+r.reviews.length)throw new Error('Invalid study event sequence.');
+  if(r.predictionRuns!==undefined&&!Array.isArray(r.predictionRuns))throw new Error('Invalid model history.');
+  const predictionRuns=(r.predictionRuns||[]) as PredictionRun[];
+  if(r.sequence!==r.plans.length+r.datasets.length+r.runs.length+r.reviews.length+predictionRuns.length)throw new Error('Invalid study event sequence.');
   at(r.createdAt);
   const plans=r.plans.map((v,i)=>{const p=obj(v);if(p.number!==i+1||(p.status!=='draft'&&p.status!=='recorded'))throw new Error('Invalid plan history.');return {number:i+1,savedAt:at(p.savedAt),status:p.status,reason:text(p.reason,'plan reason'),data:validatePlan(p.data)} as PlanRevision;});
   const datasets=r.datasets.map(v=>{const d=obj(v),p=plans.find(p=>p.number===d.planRevision);if(!p)throw new Error('Dataset plan is missing.');return validateDataset(d,p);});
   const uniqueIds=(items:unknown[])=>{const ids=items.map(item=>text(obj(item).id,'record ID',100));return ids.every(Boolean)&&new Set(ids).size===ids.length;};
-  if(![datasets,r.runs,r.reviews].every(uniqueIds))throw new Error('History record IDs must be unique and nonempty.');
+  if(![datasets,r.runs,r.reviews,predictionRuns].every(uniqueIds))throw new Error('History record IDs must be unique and nonempty.');
   for(const run of r.runs){
     const plan=plans.find(p=>p.status==='recorded'&&p.number===run.planRevision),dataset=datasets.find(d=>d.id===run.datasetId&&d.planRevision===run.planRevision);
     if(!plan||!dataset)throw new Error('Run provenance is invalid.');at(run.createdAt);
@@ -164,11 +176,12 @@ export function validateStudy(value:unknown):Study {
     const matches=(actual:unknown,expected:CountSummary|QASummary|null)=>expected===null?actual===null:!!actual&&typeof actual==='object'&&Object.entries(expected).every(([key,value])=>(actual as Record<string,unknown>)[key]===value);
     if(!matches(run.counts,expectedCounts)||!matches(run.qa,expectedQA))throw new Error('Saved results do not match their pinned inputs.');
   }
-  for(const review of r.reviews){if(!plans.some(p=>p.status==='recorded'&&p.number===review.planRevision)||!Object.hasOwn(REVIEW_DECISIONS,review.decision)||!review.reviewer?.trim()||!review.comments?.trim())throw new Error('Review provenance is invalid.');if(review.datasetId!==null&&!datasets.some(d=>d.id===review.datasetId&&d.planRevision===review.planRevision))throw new Error('Review dataset is missing.');if(review.runId!==null&&!r.runs.some(run=>run.id===review.runId&&run.datasetId===review.datasetId&&run.planRevision===review.planRevision))throw new Error('Review run is missing.');at(review.createdAt);}
+  for(const run of predictionRuns){const p=plans.find(p=>p.number===run.planRevision),d=datasets.find(d=>d.id===run.datasetId);if(!p||!d)throw new Error('Saved model input is missing.');validatePredictionRun(run,p,d);}
+  for(const review of r.reviews){if(review.predictionRunId!=null&&!predictionRuns.some(run=>run.id===review.predictionRunId&&run.datasetId===review.datasetId&&run.planRevision===review.planRevision))throw new Error('Review model run is missing.');if(!plans.some(p=>p.status==='recorded'&&p.number===review.planRevision)||!Object.hasOwn(REVIEW_DECISIONS,review.decision)||!review.reviewer?.trim()||!review.comments?.trim())throw new Error('Review provenance is invalid.');if(review.datasetId!==null&&!datasets.some(d=>d.id===review.datasetId&&d.planRevision===review.planRevision))throw new Error('Review dataset is missing.');if(review.runId!==null&&!r.runs.some(run=>run.id===review.runId&&run.datasetId===review.datasetId&&run.planRevision===review.planRevision))throw new Error('Review run is missing.');at(review.createdAt);}
   return {...r,createdAt:at(r.createdAt),plans,datasets} as unknown as Study;
 }
 export function studyDatasetStale(dataset:StudyDataset|undefined,records:QARecord[]):boolean {
-  return !!dataset?.qaRecords.some(pinned=>{const current=records.find(r=>r.id===pinned.id);return !current||currentQA(current).number!==currentQA(pinned).number;});
+  return !dataset?.generatorVersion&&!!dataset?.qaRecords.some(pinned=>{const current=records.find(r=>r.id===pinned.id);return !current||currentQA(current).number!==currentQA(pinned).number;});
 }
 export function examplePairs():CountPair[] {
   return [[9,10],[11,10],[21,18],[null,18],[0,0],[5,5]].map(([estimate,reference],i)=>({id:'fixture-'+i,observationRef:'Fixture image '+(i+1),unitRef:'Mock container '+(Math.floor(i/2)+1),observedOn:'2026-11-19',origin:'synthetic_demo',estimate,reference,method:'Predefined synthetic estimate; no AI request',referenceMethod:'Predefined fixture reference; not a biological measurement',referenceReviewer:'Synthetic reference reviewer',referenceIndependent:true,blinding:'yes',excluded:i===5,exclusionReason:i===5?'Illustrative duplicate exclusion':''}));
@@ -188,7 +201,11 @@ export function studyReport(study:Study):string {
   if(d?.qaRecords.length){lines.push('### QA snapshot references','');for(const record of d.qaRecords){const q=currentQA(record);lines.push('- '+record.id+', QA revision '+q.number+', '+reportText(q.data.container)+', '+q.data.observedOn+', origin '+q.data.origin+', outcome '+q.data.outcome+'.');}}
   lines.push('','## Descriptive / readiness output','',r?'Run '+r.id+', '+r.createdAt+'; algorithm '+r.algorithmVersion+'; software '+r.softwareVersion+'.':'Not run for this plan/dataset version.','');
   if(r){const results=r.counts??r.qa;for(const [key,value] of Object.entries(results||{}))lines.push('- '+key+': '+(value===null?'unknown':value));lines.push('','### Checks and limitations','',...r.checks.map(c=>'- '+reportText(c)));}else lines.push(...planChecks(p.data).map(c=>'- '+reportText(c)));
-  lines.push('','## Current review','',review?reportText(review.reviewer)+' — '+REVIEW_DECISIONS[review.decision]+' — '+review.createdAt:'No review for the current plan/dataset/run combination.','',review?reportText(review.comments):'','Reviewer labels are self-entered. Review does not authenticate the reviewer or establish field effectiveness.','','## History and reproducibility','','Plan versions: '+study.plans.length+'; dataset snapshots: '+study.datasets.length+'; runs: '+study.runs.length+'; reviews: '+study.reviews.length+'.','Export the JSON audit alongside this report to preserve all versions, inputs, exclusions, source QA snapshots, results and reviews. The audit contains no image bytes.','');
+  lines.push('','## Current review','',review?reportText(review.reviewer)+' — '+REVIEW_DECISIONS[review.decision]+' — '+review.createdAt:'No review for the current plan/dataset/readiness/model combination.','',review?reportText(review.comments):'','Reviewer labels are self-entered. Review does not authenticate the reviewer or establish field effectiveness.','','## History and reproducibility','','Plan versions: '+study.plans.length+'; dataset snapshots: '+study.datasets.length+'; runs: '+study.runs.length+'; reviews: '+study.reviews.length+'.','Export the JSON audit alongside this report to preserve all versions, inputs, exclusions, source QA snapshots, results and reviews. The audit contains no image bytes.','');
+  if(review)lines.push('Review binding: plan '+review.planRevision+'; dataset '+review.datasetId+'; readiness run '+review.runId+'; model run '+(review.predictionRunId??'none')+'.','');
+  const prediction=currentPredictionRun(study);
+  if(prediction){lines.push('## Container-performance ML evaluation','','Run '+prediction.id+'; '+prediction.status+'; '+prediction.algorithmVersion+'; software '+prediction.softwareVersion+'.','', 'Model data origin: '+prediction.origin+'.','Training groups: '+prediction.split.train.length+'; test groups: '+prediction.split.test.length+'; excluded input rows: '+prediction.split.excluded.length+'.','Test cutoff: '+prediction.split.cutoff+'.','',JSON.stringify(prediction.protocol,null,2),'',JSON.stringify(prediction.metrics,null,2),'',...prediction.limitations.map(c=>'- '+reportText(c)),'','Export the full audit for fitted coefficients, training preprocessing, raw inputs, exact partitions, row-level predictions and exclusions.');}
+  lines.push('','Model runs in history: '+(study.predictionRuns?.length||0)+'.');
   return lines.join('\n');
 }
-export function studyAudit(study:Study):string {return JSON.stringify({schema:'study-audit-v1',exportedAt:new Date().toISOString(),softwareVersion:STUDY_SOFTWARE,algorithmVersion:STUDY_VERSION,methods:{countError:'estimate - reference',mae:'mean(abs(countError)) over complete non-excluded pairs',unitBalancedMae:'mean of each independent-unit-reference mean absolute error',uncertainty:'No confidence interval or p-value is calculated.',model:'No model is trained by step 4B.'},guidanceReferences:STUDY_REFERENCES,study},null,2);}
+export function studyAudit(study:Study):string {return JSON.stringify({schema:'study-audit-v1',exportedAt:new Date().toISOString(),softwareVersion:STUDY_SOFTWARE,algorithmVersion:STUDY_VERSION,methods:{countError:'estimate - reference',mae:'mean(abs(countError)) over complete non-excluded pairs',unitBalancedMae:'mean of each independent-unit-reference mean absolute error',uncertainty:'The descriptive/readiness calculation has no confidence interval or p-value. Separate 4C model runs report conditional Wilson intervals for held-out proportions.',model:'The readiness calculation does not train a model; separate 4C model runs contain their own protocol and parameters.'},modelAlgorithmVersion:MODEL_VERSION,modelProtocol:MODEL_PROTOCOL,guidanceReferences:[...STUDY_REFERENCES,...MODEL_REFERENCES],study},null,2);}

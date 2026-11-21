@@ -5,6 +5,7 @@ import './styles.css';
 import './notes.css';
 import './qa.css';
 import './studies.css';
+import './models.css';
 
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
 
