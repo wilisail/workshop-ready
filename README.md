@@ -1,5 +1,7 @@
 # WorkshopReady
 
+> **Project direction — 21 November 2026:** Step 1 of the Wolbachia Field Review pivot is documented in [the baseline audit and migration scope](docs/wolbachia-step-1.md). The running application is still the workshop-note prototype described below; the image-review dashboard is planned work.
+
 Turn messy workshop and offsite notes into **Ready**, **Blocked**, and **Next actions**.
 
 The application supports Firebase AI Logic hybrid inference, with **Cloud** selected by default so a lightweight laptop can be used for setup and demonstrations. Local-model preparation is an explicit choice. Drafts are saved in the browser.

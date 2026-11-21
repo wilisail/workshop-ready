@@ -1,5 +1,7 @@
 # Cloud-first demonstration outline
 
+> **Legacy workshop prototype outline.** The approved Wolbachia dashboard workflow is recorded in [the step 1 scope](wolbachia-step-1.md). Replace this outline with the tested dashboard flow during submission preparation.
+
 Use real runtime results. Firebase is not yet configured or verified in the initial release.
 
 | Scene | Show | Say after verification |
