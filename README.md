@@ -2,9 +2,9 @@
 
 A cloud-first research prototype for reviewing release-container observations, exploring case trends and preparing follow-ups.
 
-The repository remains `wilisail/workshop-ready`. **Step 4A is implemented:** container-QA records now complement the saved-image workflow, guarded Firebase adapters and review history. Your real-photo tests and live Firebase verification are deferred. Guided study setup, evaluated ML and generated planning recommendations remain future work.
+The repository remains `wilisail/workshop-ready`. **Step 4B is implemented:** two study templates, dated plan versions, pinned input snapshots, deterministic descriptive/readiness checks and review exports now accompany container QA and saved-image review. Real-photo tests and live Firebase verification remain deferred. Evaluated ML (4C) and generated planning recommendations are next.
 
-The current presentation follows a Lotus Notes-inspired workbench: muted blue/lavender and gray, working view tabs, compact panels and table grids. The [updated workplan](docs/wolbachia-updated-plan.md) refocuses the next stages on container quality assurance and a reviewable study workflow. The planned model text reflects that scope; the model and study features are still pending.
+The current presentation follows a Lotus Notes-inspired workbench: muted blue/lavender and gray, working view tabs, compact panels and table grids. The [updated workplan](docs/wolbachia-updated-plan.md) refocuses the next stages on container quality assurance and a reviewable study workflow. The model remains untrained; study setup and review work without Firebase.
 
 ## Try the current interface
 
@@ -15,6 +15,7 @@ The existing private review deployment is https://workshop-ready-wili.williworkm
 | Overview | Location/date filters, calculated sample totals, weekly case chart, review progress and pending observations. |
 | Image review | Saved original photos, image-specific routing checks, Firebase counting adapter, validated human review and audit history; demo fixtures remain on their own tab. |
 | Container QA | Dated stage counts, batch/location references, condition, temperature provenance, separately entered outcomes, revision history and CSV/JSON export. No Firebase is needed for record entry. |
+| Study & review | Counting-accuracy and container-performance planning templates; versioned methods, input snapshots, descriptive/readiness checks, reviewer comments and Markdown/JSON export. |
 | Trends & modelling | Observed changes, case comparison, accessible chart-data table and explicit not-run states for the planned model and hypothesis tests. |
 | Field planning | Sample location signals and a manually selected demo follow-up list. |
 | Data & settings | CSV exports, reset of demo edits, four processing preferences, read-only capacity check and Firebase configuration form. |
@@ -24,6 +25,10 @@ Use **Image review → Your image tests → Add an image** to save a still JPG/P
 All sample estimates are fixtures. The illustration guides are reference positions, not detections. Charts and percentage changes are calculated from the synthetic records; no trained model or causal efficacy finding is implied.
 
 Use **Container QA → New QA observation** for the new records, or explicitly load the synthetic examples. Blank counts remain unknown; a checked zero remains zero. Temperature sources, emergence methods and operator-entered QA outcomes keep separate labels. Revisions preserve older snapshots and require a reason. Save before leaving the editor. Records use their own browser-local IndexedDB database and do not alter the case charts; export full history to retain a copy. See [step 4A details](docs/wolbachia-step-4a.md).
+
+Use **Study & review → Create synthetic study example → Run descriptive / readiness check** for a reproducible workflow example. It has six fictional observation rows, four complete pairs, three unit references, one missing pair and one excluded duplicate. Mean absolute error is 1.25 objects; unit-balanced MAE is 1.333 objects. These fixture results do not establish biological accuracy.
+
+Choose **New counting study** to enter your own method/reference count pairs, or **New prediction plan** to select matching-origin QA records. Record a dated plan before capturing its input snapshot. Plan amendments, new snapshots and new runs retain their history and need a fresh review. The primary outcome, sampling justification, reference independence, missing-data handling and repeated-unit checks support review; no universal sample cutoff, p-value, power calculation, confidence interval or automatic validity certificate is supplied. The prediction template checks data readiness; it does not train a model. See [step 4B details](docs/wolbachia-step-4b.md).
 
 ## Run locally
 
@@ -77,6 +82,7 @@ Never enter service-account keys or App Check debug tokens into the form or repo
 - Imported photos use a separate IndexedDB records/image store; queue reads load metadata only and the selected image is decoded for display. Import checks the image signature, dimensions, file size and SHA-256 hash. The original is saved without resizing.
 - A fresh AI count appends a result instead of replacing prior estimates. It invalidates the previous review for the new analysis version; old reviews remain in history. Wrong-image hashes, stale reviews and cancelled late results are rejected.
 - A model unable to count returns a null estimate rather than an invented zero. Corrections and rejections require a reason. CSV exports preserve upload/model/manual provenance; the JSON audit includes all analyses/reviews but no image bytes.
+- Study plans, pinned datasets, calculations and reviews use their own `wolbachia-field-review:studies:v1` IndexedDB database. Reviewer labels and timestamps are locally entered/generated, not authenticated external certification or preregistration. Export the full JSON audit with the readable methods report; neither includes image bytes.
 - Saved image tests do not change the synthetic case charts. Combining them with planning/model features belongs to the next analysis stage. Resetting demo edits does not delete saved photo records.
 - The built service worker retains the application-shell caching mechanism. Reopening the deployed app offline still needs verification; a saved review is not offline AI generation.
 
@@ -89,8 +95,8 @@ The owner-run [terminal readers](docs/capacity-routing.md) and [Qwen learning ex
 ## Next stages
 
 1. Your deferred real-photo tests, Firebase/App Check configuration and live inference verification.
-2. Guided study setup/review, followed by an evaluated container-performance ML example using the new QA records.
-3. Evidence-linked inspection priorities, human decisions and study/report export.
+2. An evaluated container-performance ML example (4C), using pre-outcome inputs, grouped held-out units and a simple baseline.
+3. Evidence-linked inspection priorities, human decisions and a planning report.
 4. Live Firebase/App Check and task-specific routing verification on the deployed domain.
 5. End-to-end checks, public judging access, current contest-rule review and demonstration recording.
 
