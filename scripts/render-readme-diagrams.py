@@ -1,12 +1,13 @@
-"""Render precise, monochrome README figures and their editable flow sources.
+"""Render original monochrome stencil figures and editable semantic sources.
 
-Requires Graphviz (`dot`); uses only the Python standard library.
-The same node/edge definitions produce SVG, DOT and Mermaid source.
+Run `python scripts/render-readme-diagrams.py` from the repository. Uses only the
+Python standard library. SVG styling/layout lives in diagram_stencils.py; DOT and
+Mermaid export the same complete semantic nodes and edges as editable flowcharts.
 """
 from pathlib import Path
 import json
-import subprocess
 import xml.etree.ElementTree as ET
+from diagram_stencils import render
 
 ROOT = Path(__file__).resolve().parents[1]
 DEST = ROOT / 'docs' / 'figures'
@@ -40,17 +41,10 @@ def figure(name, title, description, nodes, edges, ranks=(), note=''):
         dot.append('{ rank=sink; note; }')
     dot.append('}')
     dot_path = DEST / (name + '.dot')
-    dot_path.write_text('\n'.join(dot) + '\n')
-    (DEST / (name + '.mmd')).write_text('\n'.join(mermaid) + '\n')
+    dot_path.write_text('\n'.join(dot) + '\n', encoding='utf-8')
+    (DEST / (name + '.mmd')).write_text('\n'.join(mermaid) + '\n', encoding='utf-8')
     svg_path = DEST / (name + '.svg')
-    subprocess.run(['dot', '-Tsvg', str(dot_path), '-o', str(svg_path)], check=True)
-    # Accessible figure-level description; no scripts, remote assets or HTML.
-    svg = svg_path.read_text()
-    svg = svg.replace('<svg ', '<svg role="img" aria-labelledby="figure-title figure-description" ', 1)
-    start = svg.index('>', svg.index('<svg ')) + 1
-    from html import escape
-    svg = svg[:start] + f'\n<title id="figure-title">{escape(title)}</title>\n<desc id="figure-description">{escape(description)}</desc>' + svg[start:]
-    svg_path.write_text(svg)
+    svg_path.write_text(render(name, title, description, nodes, edges), encoding='utf-8')
     ET.parse(svg_path)
 
 
@@ -79,7 +73,7 @@ figure('network-stack', '1. Network stack: transport and execution are separate 
            ('internal', 'sharedstore', 'shared persistence', True),
        ],
        [('staff', 'field'), ('premises', 'remote'), ('device', 'vercel', 'internal'), ('browserstore', 'sharedstore')],
-       'Solid boxes: current software or labelled reference patterns. Dashed boxes/arrows: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype.')
+       'Current/future/reference labels distinguish component status. Dashed routes: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype.')
 
 figure('wolbachia-evidence', '2. Wolbachia field evidence: three distinct observation streams',
        'Release containers produce mosquitoes and supply stage-aware QA observations. Adult monitoring traps supply specimens for species identification and laboratory infection assays. Dengue surveillance supplies clinical outcomes for a separate epidemiological design. None of these measurements substitutes for another.',
@@ -124,4 +118,4 @@ figure('review-and-ml', '3. Prototype data flow: review, evaluate, then plan ins
        [('evaluation', 'planning')],
        'Dashed arrow: contextual evidence, not automated ranking. Case charts are separate synthetic context.\nCurrent model results demonstrate an evaluation pipeline, not useful field prediction.')
 
-print('Rendered three monochrome SVG figures with matching DOT and Mermaid sources.')
+print('Rendered three original outline-stencil SVG figures with matching semantic DOT and Mermaid sources.')

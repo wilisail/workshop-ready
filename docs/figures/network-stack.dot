@@ -27,6 +27,6 @@ internal -> sharedstore [label="shared persistence", style=dashed];
 { rank=same; premises; remote; }
 { rank=same; device; vercel; internal; }
 { rank=same; browserstore; sharedstore; }
-note [shape=plaintext, fontsize=12, label="Solid boxes: current software or labelled reference patterns. Dashed boxes/arrows: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype."];
+note [shape=plaintext, fontsize=12, label="Current/future/reference labels distinguish component status. Dashed routes: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype."];
 { rank=sink; note; }
 }
