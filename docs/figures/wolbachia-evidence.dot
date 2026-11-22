@@ -1,0 +1,26 @@
+digraph wolbachia_evidence {
+graph [bgcolor="white", rankdir=TB, pad="0.35", nodesep="0.32", ranksep="0.6", splines=polyline, fontname="DejaVu Sans", fontsize=18, labelloc=t, labeljust=l];
+label="2. Wolbachia field evidence: three distinct observation streams";
+node [shape=box, style="filled", fillcolor="white", color="black", fontcolor="black", fontname="DejaVu Sans", fontsize=15, penwidth=1.3, margin="0.16,0.12"];
+edge [color="black", fontcolor="black", fontname="DejaVu Sans", fontsize=12, penwidth=1.2, arrowsize=0.75];
+stock [label="Laboratory Wolbachia stock\nReference field programme [1, 2]"];
+trap [label="Adult mosquito monitoring\nBG-Sentinel trap example [1, 2]"];
+health [label="Dengue surveillance\nDated, located health records [3]"];
+release [label="Mosquito release container (MRC)\nEggs > larvae > pupae > adults\nReleases mosquitoes; not a capture trap"];
+assay [label="Species identification + lab assay\nPCR / qPCR or other validated method\nInfection is not read from a photograph"];
+casequality [label="Case definition and reporting\nLaboratory confirmation where required\nPopulation / intervention context"];
+qa [label="Stage-aware container QA\nCounts / condition / dates\nSeparate emergence or outcome assessment"];
+prevalence [label="Wolbachia prevalence\nPositive specimens / specimens tested\nRetain sample, place and date"];
+impact [label="Epidemiological impact evaluation\nComparator, study design, uncertainty\nDistinct from a container-count trend"];
+stock -> release;
+release -> qa;
+trap -> assay;
+assay -> prevalence;
+health -> casequality;
+casequality -> impact;
+{ rank=same; stock; trap; health; }
+{ rank=same; release; assay; casequality; }
+{ rank=same; qa; prevalence; impact; }
+note [shape=plaintext, fontsize=12, label="Reference workflow, not a rearing/release protocol. Paper numbers refer to the README references.\nFewer visible larvae alone do not establish successful adult emergence or reduced dengue."];
+{ rank=sink; note; }
+}

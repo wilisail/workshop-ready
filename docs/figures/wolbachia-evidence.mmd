@@ -1,0 +1,16 @@
+flowchart TD
+    stock["Laboratory Wolbachia stock / Reference field programme [1, 2]"]
+    trap["Adult mosquito monitoring / BG-Sentinel trap example [1, 2]"]
+    health["Dengue surveillance / Dated, located health records [3]"]
+    release["Mosquito release container (MRC) / Eggs > larvae > pupae > adults / Releases mosquitoes; not a capture trap"]
+    assay["Species identification + lab assay / PCR / qPCR or other validated method / Infection is not read from a photograph"]
+    casequality["Case definition and reporting / Laboratory confirmation where required / Population / intervention context"]
+    qa["Stage-aware container QA / Counts / condition / dates / Separate emergence or outcome assessment"]
+    prevalence["Wolbachia prevalence / Positive specimens / specimens tested / Retain sample, place and date"]
+    impact["Epidemiological impact evaluation / Comparator, study design, uncertainty / Distinct from a container-count trend"]
+    stock --> release
+    release --> qa
+    trap --> assay
+    assay --> prevalence
+    health --> casequality
+    casequality --> impact

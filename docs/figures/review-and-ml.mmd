@@ -1,0 +1,21 @@
+flowchart TD
+    photo["Saved image [current] / Generated bead proxy / user photo"]
+    counter["Pixel counter [current] / Vercel CPU or browser worker / Not a trained larvae detector"]
+    review["Human image review [current] / Accept / correct / reject / Retain estimate and review history"]
+    qa["Container QA record [current] / Dated stage counts and conditions / Outcome assessed separately"]
+    study["Study plan + pinned snapshot [current] / Unit / target / reference / missingness"]
+    model["Numeric model [experimental] / Later failed vs satisfactory QA / Use earlier observations only"]
+    evaluation["Held-out evaluation [current] / Grouped / chronological partition / Two baselines + failure recall"]
+    planning["Inspection queue [current] / Rules + available evidence / Human accept / defer / dismiss"]
+    export["Reviewable exports [current] / Pinned inputs / methods / versions / Reasons and decision history"]
+    photo --> counter
+    counter --> review
+    review -->|"manual entry; no automatic link"| qa
+    qa --> study
+    study --> model
+    model --> evaluation
+    qa -->|"condition / completeness / age"| planning
+    study -->|"optional study evidence"| planning
+    evaluation -.->|"optional historical context; / scores do not rank the queue"| planning
+    evaluation --> export
+    planning --> export

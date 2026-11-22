@@ -1,0 +1,21 @@
+flowchart TD
+    staff["Staff browser [current] / Phone / laptop"]
+    field["Field camera or sensor [future] / Release container / adult trap"]
+    premises["Same-premises link [reference] / Ethernet / Wi-Fi / Nearby BLE sensor uses a gateway"]
+    remote["Remote uplink [reference] / Photos: cellular / private radio bridge / Small readings: LoRaWAN + gateway"]
+    routing["Application and route choice [current] / Select a permitted execution target"]
+    device["Device worker [current] / Small bead CV / numeric ML"]
+    vercel["Vercel function [current] / Small bead CV"]
+    internal["Internal AI service [future] / Shared on-premises compute"]
+    browserstore["Browser records [current] / IndexedDB / localStorage"]
+    sharedstore["Institutional records [future] / Local database / image archive"]
+    staff --> premises
+    field -.-> remote
+    premises -->|"web access"| routing
+    remote -.->|"ingestion adapter needed"| routing
+    routing -->|"device route"| device
+    routing -->|"hosted route"| vercel
+    routing -.->|"intranet route needed"| internal
+    device -->|"reviewed result"| browserstore
+    vercel -->|"returned to browser"| browserstore
+    internal -.->|"shared persistence"| sharedstore

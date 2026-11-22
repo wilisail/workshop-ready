@@ -1,0 +1,32 @@
+digraph network_stack {
+graph [bgcolor="white", rankdir=TB, pad="0.35", nodesep="0.32", ranksep="0.6", splines=polyline, fontname="DejaVu Sans", fontsize=18, labelloc=t, labeljust=l];
+label="1. Network stack: transport and execution are separate choices";
+node [shape=box, style="filled", fillcolor="white", color="black", fontcolor="black", fontname="DejaVu Sans", fontsize=15, penwidth=1.3, margin="0.16,0.12"];
+edge [color="black", fontcolor="black", fontname="DejaVu Sans", fontsize=12, penwidth=1.2, arrowsize=0.75];
+staff [label="Staff browser [current]\nPhone / laptop"];
+field [label="Field camera or sensor [future]\nRelease container / adult trap", style="filled,dashed"];
+premises [label="Same-premises link [reference]\nEthernet / Wi-Fi\nNearby BLE sensor uses a gateway"];
+remote [label="Remote uplink [reference]\nPhotos: cellular / private radio bridge\nSmall readings: LoRaWAN + gateway"];
+routing [label="Application and route choice [current]\nSelect a permitted execution target"];
+device [label="Device worker [current]\nSmall bead CV / numeric ML"];
+vercel [label="Vercel function [current]\nSmall bead CV"];
+internal [label="Internal AI service [future]\nShared on-premises compute", style="filled,dashed"];
+browserstore [label="Browser records [current]\nIndexedDB / localStorage"];
+sharedstore [label="Institutional records [future]\nLocal database / image archive", style="filled,dashed"];
+staff -> premises;
+field -> remote [style=dashed];
+premises -> routing [label="web access"];
+remote -> routing [label="ingestion adapter needed", style=dashed];
+routing -> device [label="device route"];
+routing -> vercel [label="hosted route"];
+routing -> internal [label="intranet route needed", style=dashed];
+device -> browserstore [label="reviewed result"];
+vercel -> browserstore [label="returned to browser"];
+internal -> sharedstore [label="shared persistence", style=dashed];
+{ rank=same; staff; field; }
+{ rank=same; premises; remote; }
+{ rank=same; device; vercel; internal; }
+{ rank=same; browserstore; sharedstore; }
+note [shape=plaintext, fontsize=12, label="Solid boxes: current software or labelled reference patterns. Dashed boxes/arrows: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype."];
+{ rank=sink; note; }
+}

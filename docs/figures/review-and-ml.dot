@@ -1,0 +1,29 @@
+digraph review_and_ml {
+graph [bgcolor="white", rankdir=TB, pad="0.35", nodesep="0.32", ranksep="0.6", splines=polyline, fontname="DejaVu Sans", fontsize=18, labelloc=t, labeljust=l];
+label="3. Prototype data flow: review, evaluate, then plan inspections";
+node [shape=box, style="filled", fillcolor="white", color="black", fontcolor="black", fontname="DejaVu Sans", fontsize=15, penwidth=1.3, margin="0.16,0.12"];
+edge [color="black", fontcolor="black", fontname="DejaVu Sans", fontsize=12, penwidth=1.2, arrowsize=0.75];
+photo [label="Saved image [current]\nGenerated bead proxy / user photo"];
+counter [label="Pixel counter [current]\nVercel CPU or browser worker\nNot a trained larvae detector"];
+review [label="Human image review [current]\nAccept / correct / reject\nRetain estimate and review history"];
+qa [label="Container QA record [current]\nDated stage counts and conditions\nOutcome assessed separately"];
+study [label="Study plan + pinned snapshot [current]\nUnit / target / reference / missingness"];
+model [label="Numeric model [experimental]\nLater failed vs satisfactory QA\nUse earlier observations only"];
+evaluation [label="Held-out evaluation [current]\nGrouped / chronological partition\nTwo baselines + failure recall"];
+planning [label="Inspection queue [current]\nRules + available evidence\nHuman accept / defer / dismiss"];
+export [label="Reviewable exports [current]\nPinned inputs / methods / versions\nReasons and decision history"];
+photo -> counter;
+counter -> review;
+review -> qa [label="manual entry; no automatic link"];
+qa -> study;
+study -> model;
+model -> evaluation;
+qa -> planning [label="condition / completeness / age"];
+study -> planning [label="optional study evidence"];
+evaluation -> planning [label="optional historical context;\nscores do not rank the queue", style=dashed];
+evaluation -> export;
+planning -> export;
+{ rank=same; evaluation; planning; }
+note [shape=plaintext, fontsize=12, label="Dashed arrow: contextual evidence, not automated ranking. Case charts are separate synthetic context.\nCurrent model results demonstrate an evaluation pipeline, not useful field prediction."];
+{ rank=sink; note; }
+}
