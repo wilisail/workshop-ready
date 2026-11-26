@@ -242,3 +242,13 @@ td>strong { color: #30476b; }
 .counter-legend strong { color: #16613b; }
 .photo-runtime label:not(:first-child) { margin-top: 12px; }
 .photo-workspace-intro .button-row { flex-wrap: wrap; flex-shrink: 1; }
+.network-panel { margin: 0 0 18px; min-width: 0; }
+.network-facts { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px 24px; margin: 0; padding: 16px 18px; }
+.network-facts dt { font-size: .75rem; color: #62677d; margin-bottom: 4px; }
+.network-facts dd { margin: 0; color: #343864; font-size: .875rem; font-weight: 600; }
+.network-facts small { display: block; color: #62677d; font-size: .75rem; line-height: 1.5; margin-top: 4px; }
+.network-route { padding: 12px 18px; border-top: 1px solid #c4c7d3; font-size: .8125rem; line-height: 1.6; overflow-wrap: anywhere; }
+.network-route p { margin: 6px 0 0; }
+.network-check { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 0 18px 16px; }
+.network-check span { font-size: .75rem; color: #62677d; }
+@media (max-width: 600px) { .network-facts { grid-template-columns: minmax(0,1fr); } }

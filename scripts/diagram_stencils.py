@@ -219,20 +219,20 @@ def network(c):
     c.connect('routing', 'vercel', [(680, 581), (680, 650)], ['Hosted route'], (706, 628), anchor='start')
     c.connect('routing', 'internal', [(704, 581), (704, 612), (1140, 612), (1140, 650)], ['Intranet route needed'], (1007, 600))
     c.connect('device', 'browserstore', [(220, 845), (220, 890), (445, 890), (445, 932)], ['Reviewed result'], (304, 876))
-    c.connect('vercel', 'browserstore', [(680, 845), (680, 890), (445, 890), (445, 932)], ['Returned to browser'], (582, 876))
+    c.connect('vercel', 'browserstore', [(680, 875), (680, 910), (445, 910), (445, 932)], ['Returned to browser'], (582, 896))
     c.connect('internal', 'sharedstore', [(1140, 845), (1140, 932)], ['Shared persistence'], (1170, 895), anchor='start')
     c.node('staff', 155, 185, 'clients', 'Staff browser', ['Phone / laptop'], 'current')
     c.node('field', 850, 185, 'camera', 'Field camera / sensor', ['At release container / adult trap'], 'future')
     c.node('premises', 455, 185, 'router', 'Premises network', ['Ethernet / Wi-Fi', 'Nearby BLE needs a gateway'], 'reference pattern')
     c.node('remote', 1170, 185, 'gateway', 'Remote uplink', ['Photos: cellular / radio bridge', 'Small readings: LoRaWAN + gateway'], 'reference pattern')
-    c.node('routing', 680, 436, 'route', 'Application + route choice', ['Select a permitted execution target'], 'current')
+    c.node('routing', 680, 436, 'route', 'Application + route choice', ['Preference + service metadata check'], 'current')
     c.node('device', 220, 698, 'worker', 'Device worker', ['Small bead CV / numeric ML'], 'current')
-    c.node('vercel', 680, 698, 'cloud', 'Vercel function', ['Small bead CV'], 'current')
+    c.node('vercel', 680, 698, 'cloud', 'Vercel function', ['GET metadata / POST reduced pixels', 'Small bead CV'], 'current')
     c.node('internal', 1140, 698, 'server', 'Internal AI service', ['Shared on-premises compute'], 'future')
     c.node('browserstore', 445, 980, 'browser-store', 'Browser records', ['IndexedDB / localStorage'], 'current')
     c.node('sharedstore', 1140, 980, 'database', 'Institutional records', ['Local database / image archive'], 'future')
-    c.footer(1150, ['Solid routes: current software or labelled reference patterns. Dashed routes: future integration.',
-                    'Physical network equipment and remote ingestion are not deployed by this prototype.'])
+    c.footer(1150, ['GET checks service metadata. POST counts reduced pixels. Device counting uploads no image.',
+                    'Dashed routes: future integration. Field equipment, shared sync and intranet service are not deployed.'])
 
 
 def evidence(c):

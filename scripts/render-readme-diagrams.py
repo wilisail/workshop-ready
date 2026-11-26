@@ -55,9 +55,9 @@ figure('network-stack', '1. Network stack: transport and execution are separate 
            ('field', 'Field camera or sensor [future]\nRelease container / adult trap', True),
            ('premises', 'Same-premises link [reference]\nEthernet / Wi-Fi\nNearby BLE sensor uses a gateway', False),
            ('remote', 'Remote uplink [reference]\nPhotos: cellular / private radio bridge\nSmall readings: LoRaWAN + gateway', False),
-           ('routing', 'Application and route choice [current]\nSelect a permitted execution target', False),
+           ('routing', 'Application and route choice [current]\nPreference + service metadata check\nLast result retains actual runtime', False),
            ('device', 'Device worker [current]\nSmall bead CV / numeric ML', False),
-           ('vercel', 'Vercel function [current]\nSmall bead CV', False),
+           ('vercel', 'Vercel function [current]\nGET metadata / POST reduced pixels\nSmall bead CV', False),
            ('internal', 'Internal AI service [future]\nShared on-premises compute', True),
            ('browserstore', 'Browser records [current]\nIndexedDB / localStorage', False),
            ('sharedstore', 'Institutional records [future]\nLocal database / image archive', True),
@@ -73,7 +73,7 @@ figure('network-stack', '1. Network stack: transport and execution are separate 
            ('internal', 'sharedstore', 'shared persistence', True),
        ],
        [('staff', 'field'), ('premises', 'remote'), ('device', 'vercel', 'internal'), ('browserstore', 'sharedstore')],
-       'Current/future/reference labels distinguish component status. Dashed routes: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype.')
+       'GET checks service metadata; POST counts a reduced image; device counting uploads no image.\nDashed routes are future integration. Field equipment, shared sync and an intranet service are not deployed.')
 
 figure('wolbachia-evidence', '2. Wolbachia field evidence: three distinct observation streams',
        'Release containers produce mosquitoes and supply stage-aware QA observations. Adult monitoring traps supply specimens for species identification and laboratory infection assays. Dengue surveillance supplies clinical outcomes for a separate epidemiological design. None of these measurements substitutes for another.',

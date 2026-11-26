@@ -141,9 +141,9 @@
 <text x="304" y="876" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" fill="#161616" stroke="white" stroke-width="7" paint-order="stroke">Reviewed result</text>
 </g>
 <g id="edge-vercel-browserstore"><title>vercel to browserstore: returned to browser</title>
-<polyline points="680,845 680,890 445,890 445,932" marker-end="url(#arrow)"/>
-<circle cx="680" cy="845" r="2.6" fill="white"/>
-<text x="582" y="876" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" fill="#161616" stroke="white" stroke-width="7" paint-order="stroke">Returned to browser</text>
+<polyline points="680,875 680,910 445,910 445,932" marker-end="url(#arrow)"/>
+<circle cx="680" cy="875" r="2.6" fill="white"/>
+<text x="582" y="896" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="400" fill="#161616" stroke="white" stroke-width="7" paint-order="stroke">Returned to browser</text>
 </g>
 <g id="edge-internal-sharedstore"><title>internal to sharedstore: shared persistence</title>
 <polyline points="1140,845 1140,932" marker-end="url(#arrow)" stroke-dasharray="7 6"/>
@@ -183,11 +183,12 @@ Small readings: LoRaWAN + gateway</title>
 <text x="1170" y="338" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Small readings: LoRaWAN + gateway</text>
 </g>
 <g id="node-routing"><title>Application and route choice [current]
-Select a permitted execution target</title>
+Preference + service metadata check
+Last result retains actual runtime</title>
 <use href="#icon-route" x="616" y="388" width="128" height="96"/>
 <text x="680" y="511" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="500" fill="#161616" stroke="none">Application + route choice</text>
 <text x="680" y="535" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#565656" letter-spacing="1.3" stroke="none">CURRENT</text>
-<text x="680" y="563" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Select a permitted execution target</text>
+<text x="680" y="563" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Preference + service metadata check</text>
 </g>
 <g id="node-device"><title>Device worker [current]
 Small bead CV / numeric ML</title>
@@ -197,11 +198,13 @@ Small bead CV / numeric ML</title>
 <text x="220" y="825" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Small bead CV / numeric ML</text>
 </g>
 <g id="node-vercel"><title>Vercel function [current]
+GET metadata / POST reduced pixels
 Small bead CV</title>
 <use href="#icon-cloud" x="616" y="650" width="128" height="96"/>
 <text x="680" y="773" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="500" fill="#161616" stroke="none">Vercel function</text>
 <text x="680" y="797" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="600" fill="#565656" letter-spacing="1.3" stroke="none">CURRENT</text>
-<text x="680" y="825" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Small bead CV</text>
+<text x="680" y="825" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">GET metadata / POST reduced pixels</text>
+<text x="680" y="851" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Small bead CV</text>
 </g>
 <g id="node-internal"><title>Internal AI service [future]
 Shared on-premises compute</title>
@@ -225,7 +228,7 @@ Local database / image archive</title>
 <text x="1140" y="1107" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#161616" stroke="none">Local database / image archive</text>
 </g>
 <path d="M48 1150H1312" stroke="#d5d5d5" stroke-width="1"/>
-<text x="48" y="1182" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#565656" stroke="none">Solid routes: current software or labelled reference patterns. Dashed routes: future integration.</text>
-<text x="48" y="1209" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#565656" stroke="none">Physical network equipment and remote ingestion are not deployed by this prototype.</text>
+<text x="48" y="1182" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#565656" stroke="none">GET checks service metadata. POST counts reduced pixels. Device counting uploads no image.</text>
+<text x="48" y="1209" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="400" fill="#565656" stroke="none">Dashed routes: future integration. Field equipment, shared sync and intranet service are not deployed.</text>
 </g>
 </svg>

@@ -2,7 +2,9 @@
 
 A research prototype for **release-container checks, reviewable observations and inspection planning**. This front page explains the network stack and the public-health data system before introducing the application.
 
-[Open the live dashboard](https://workshop-ready-theta.vercel.app/) · [Technical guide and setup](docs/technical-guide.md) · [Current workplan](docs/wolbachia-updated-plan.md) · [MIT licence](LICENSE)
+[Open the live dashboard](https://workshop-ready-theta.vercel.app/) · [Technical guide and setup](docs/technical-guide.md) · [Three goals and current workplan](docs/remaining-steps-and-goals.md) · [MIT licence](LICENSE)
+
+**Delivery goals:** network visibility, a practical public-health collection/review trial, and cloud-first processing with local fallback. Firebase is an optional connector point. Owner-operated laptop/photo checks are scheduled after implementation. See the [remaining steps, owners and hours](docs/remaining-steps-and-goals.md).
 
 **Current demonstration:** prepared bead images, fictional locations and synthetic records. The image counter runs on Vercel or in a browser worker. Container records, study checks, numeric model evaluation and inspection planning are implemented. Field cameras, biological image validation, intranet deployment, shared storage and live Firebase verification are later or unfinished work.
 
@@ -34,6 +36,19 @@ A research prototype for **release-container checks, reviewable observations and
 One gateway can serve a cluster only where coverage permits. A single ordinary Wi-Fi/Bluetooth network is not assumed to cover a scattered city-wide deployment. A cellular uplink can terminate at an institution's own server; it does not require public-cloud AI.
 
 **Implementation boundary.** The current choices are Vercel/browser routes, not a finished intranet installation. An internal deployment needs a production server package, an explicit internal-server route, trusted HTTPS and optional shared records. Reachability must be checked against the actual server: the browser's online flag does not reliably distinguish internet access from a working LAN. [N3] Supabase is not connected in the current build.
+
+### Observable routes — step 6A
+
+Open **Data & settings** or **Image review → Your saved images** for the **Network & processing** panel. It separates the browser's connection hint, an explicitly checked service response, local browser capabilities and the actual runtime retained with an image result. **Check bead service** sends only a bounded metadata request; it uploads no photo and does not invoke Firebase or a model. Connection changes clear the last check; its timestamp describes a point-in-time result, not continuous monitoring.
+
+| Implemented path | Data crossing the path | Evidence shown |
+|---|---|---|
+| Browser → same-origin `GET /api/count-image` | No image, credentials or record payload | Validated counter version/runtime and last-check time; HTTP errors, wrong metadata and timeouts remain unverified |
+| Browser → same-origin `POST /api/count-image` | Reduced RGB pixels, settings and fingerprints | `vercel-function` on Vercel; `development-server` on the development adapter |
+| Browser → local worker | Pixels transferred within the device; no image upload | `browser-worker` in the saved result |
+| Browser → IndexedDB/localStorage | Local images, results and workspace records | Browser-local persistence and exports; no shared database sync |
+
+Cloud-first permits worker fallback on service failure. Cloud-only and device-only retain their restrictions; integrity failures are surfaced rather than replaced with a fallback answer. The local capability check does not execute a count or establish cold offline reopening. See [6A implementation and verification](docs/wolbachia-step-6a.md); disconnected reopening and complete workflow verification remain step 6B.
 
 ## 2. Wolbachia collection, evidence and ML system
 
@@ -87,9 +102,9 @@ The main views are **Overview**, **Image review**, **Container QA**, **Study & r
 | Vercel and browser bead counter; explicit routing and human review | Prepared-photo error measurements and biological detection validation |
 | Container QA, study checks, real numeric fitting/evaluation and inspection workflow | Field usefulness and any new or improved model |
 | Browser records, history and CSV/JSON/report exports | Shared institutional storage, field devices and intranet deployment |
-| 97 automated tests, compiled-server check and successful CI/build at the v0.8 release | Cold offline reopening and the optional Firebase/Chrome model route |
+| Network/service diagnostics, actual runtime labels and 104 automated tests plus the compiled-server check | Cold offline reopening, owner-operated laptop checks and the optional Firebase/Chrome model route |
 
-Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [workplan](docs/wolbachia-updated-plan.md).
+Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [current workplan](docs/remaining-steps-and-goals.md).
 
 ## References
 

@@ -7,9 +7,9 @@ staff [label="Staff browser [current]\nPhone / laptop"];
 field [label="Field camera or sensor [future]\nRelease container / adult trap", style="filled,dashed"];
 premises [label="Same-premises link [reference]\nEthernet / Wi-Fi\nNearby BLE sensor uses a gateway"];
 remote [label="Remote uplink [reference]\nPhotos: cellular / private radio bridge\nSmall readings: LoRaWAN + gateway"];
-routing [label="Application and route choice [current]\nSelect a permitted execution target"];
+routing [label="Application and route choice [current]\nPreference + service metadata check\nLast result retains actual runtime"];
 device [label="Device worker [current]\nSmall bead CV / numeric ML"];
-vercel [label="Vercel function [current]\nSmall bead CV"];
+vercel [label="Vercel function [current]\nGET metadata / POST reduced pixels\nSmall bead CV"];
 internal [label="Internal AI service [future]\nShared on-premises compute", style="filled,dashed"];
 browserstore [label="Browser records [current]\nIndexedDB / localStorage"];
 sharedstore [label="Institutional records [future]\nLocal database / image archive", style="filled,dashed"];
@@ -27,6 +27,6 @@ internal -> sharedstore [label="shared persistence", style=dashed];
 { rank=same; premises; remote; }
 { rank=same; device; vercel; internal; }
 { rank=same; browserstore; sharedstore; }
-note [shape=plaintext, fontsize=12, label="Current/future/reference labels distinguish component status. Dashed routes: future integration.\nPhysical network equipment and remote ingestion are not deployed by this prototype."];
+note [shape=plaintext, fontsize=12, label="GET checks service metadata; POST counts a reduced image; device counting uploads no image.\nDashed routes are future integration. Field equipment, shared sync and an intranet service are not deployed."];
 { rank=sink; note; }
 }
