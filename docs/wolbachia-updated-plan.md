@@ -2,6 +2,8 @@
 
 Updated: 22 November 2026 (WIB).
 
+**Current delivery plan (26 November 2026):** [three goals and remaining steps](remaining-steps-and-goals.md). It replaces the unfinished-work/Firebase estimates below with steps 6A–6E and 7, retains Firebase as an optional connector only, and defers owner-operated checks until implementation is ready. The older details below remain implementation history.
+
 **Route update (0.8):** the product now uses a small Vercel/browser bead counter without Firebase setup. Firebase integration is optional and deferred; the legacy steps below retain the earlier contest-route estimates. See `vercel-counter.md`. Public demo: https://workshop-ready-theta.vercel.app/.
 Repository: https://github.com/wilisail/workshop-ready
 
