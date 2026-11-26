@@ -20,7 +20,7 @@ Times below estimate active work, not a promise of elapsed time. They are the re
 
 | Step | Remaining work / acceptance | Implementer | Wili, deferred | State |
 | --- | --- | --- | --- | --- |
-| 6A | Verify browser → hosted counter and browser-worker paths; show connection hint separately from a checked API response; record source and update the network explanation | 0.5–1 h | 10–15 min, laptop check | In progress |
+| 6A | Verify browser → hosted counter and browser-worker paths; show connection hint separately from a checked API response; record source and update the network explanation | 0.5–1 h estimate; implementation finished | 10–15 min, laptop check | Implemented; automated, CI and hosted/browser checks passed; owner check deferred |
 | 6B | Prepare assets locally; verify reopening, counting, record saving, human review and export while disconnected; cloud-first fallback must be observable | 2–3 h | 20–30 min, disconnected-device check | Pending |
 | 6C | Prepared real bead photos with independent counts; error/missingness report; practical public-health data-entry/review trial with available observations | 1–1.5 h | 30–60 min, photos/reference counts and workflow trial | Pending; depends on owner evidence |
 | 6D | Preserve and document the optional Firebase connector as inactive/unverified; no live Firebase demonstration | 15–30 min | None | Pending connector review |
@@ -32,7 +32,7 @@ Total: approximately **7–11 combined working hours**, including around **2–3
 ## Existing evidence and limits
 
 - Steps 1–5, study readiness checks, numeric evaluation and inspection planning were implemented on demonstration evidence. Fuller EDA and real-data usefulness remain separate improvements.
-- The prior release reported 97 passing automated tests, a compiled-server check and successful CI/build. New step 6A results will be recorded separately.
+- The prior release reported 97 passing automated tests. Step 6A now passes 104 tests, the compiled-server check, production build and GitHub CI. Its live metadata probe and distinct hosted/browser counts were also checked; see [6A evidence](wolbachia-step-6a.md).
 - Both hosted and browser routes previously counted the generated eight-object proxy. This is a controlled synthetic check, not an accuracy measurement on field images.
 - The small counter accepts `bead_proxy` only. Real biological images can be saved and manually reviewed; they must not be relabelled as beads to obtain an automated count.
 - A service worker for built assets exists. Cold offline reopening and the complete disconnected workflow remain pending step 6B verification.
@@ -41,7 +41,7 @@ Total: approximately **7–11 combined working hours**, including around **2–3
 
 ## Next execution order
 
-1. Push this plan and implement/check 6A.
+1. Completed: push this plan and implement/check 6A; owner-operated laptop confirmation remains deferred.
 2. Implement and check 6B without waiting for owner-operated checks.
 3. Prepare 6C inputs/report structure, review the optional connector in 6D, and write 6E instructions.
 4. Run owner-operated checks as one later block; keep any missing evidence visibly pending.
@@ -51,4 +51,4 @@ Total: approximately **7–11 combined working hours**, including around **2–3
 
 - Repository: https://github.com/wilisail/workshop-ready
 - Live app: https://workshop-ready-theta.vercel.app/
-- Network implementation and step 6A evidence: [step 6A notes](wolbachia-step-6a.md) (added with the implementation).
+- Network implementation and step 6A evidence: [step 6A notes](wolbachia-step-6a.md).

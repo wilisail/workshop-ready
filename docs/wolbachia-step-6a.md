@@ -34,7 +34,32 @@ The small image counter accepts separated bead proxies only. The local numeric m
 
 - **104 automated tests passed**, including seven new tests for real metadata handling, request privacy, distinct runtimes, bad HTTP/HTML/metadata responses, malformed JSON, network failure, timeout, cancellation and source labels.
 - The compiled Node API smoke check and TypeScript/Vite production build passed.
-- Browser/deployment verification is recorded below after execution.
+- GitHub's [Check application workflow](https://github.com/wilisail/workshop-ready/actions/runs/45856891394) passed for implementation commit `539860d6af0c1cc27315cfd295bd002c8b142579`.
+
+### Hosted browser verification
+
+Checked the public Vercel app on 26 November 2026, approximately 23:16–23:17 WIB, using the cloud browser. These checks do not substitute for Wili's later laptop test.
+
+1. Opened **Data & settings** without evaluator login. The new panel initially showed the browser hint separately from an unchecked service.
+2. Pressed **Check bead service** and observed **Vercel counting service responded**, a last-check timestamp and request duration. No image was selected or uploaded for that probe.
+3. In Image review, generated a fresh eight-bead example while retaining the earlier saved example. Cloud-first counting computed **8**, and both the result and panel identified **Vercel function**.
+4. Selected device-only. The previous result continued to identify Vercel until a new count ran. The next count computed **8** and identified **This browser's worker**.
+5. Restored cloud-first and reloaded. Both analyses remained in history, and the last result retained its actual browser-worker source despite the changed preference.
+6. Rechecked service metadata in the image workspace; it responded independently of the retained local result. Inspected the desktop panel and count display visually. The inspected browser error entries were extension metadata errors, with no application-source error in those entries; this was not a production-wide monitoring audit.
+
+### Deployment result
+
+| Item | Verified result |
+| --- | --- |
+| Public app | https://workshop-ready-theta.vercel.app/#review |
+| Environment / state | Production / READY |
+| Implementation commit | `539860d6af0c1cc27315cfd295bd002c8b142579` |
+| Vercel deployment | `dpl_E8UWFq8nzMAe8PnQj4riffu4MqRg` |
+| Framework | Vite + React; existing Node count function retained |
+| Build duration | Approximately 40 seconds from provider timestamps |
+| Access | Existing public project domain retained; no audience or authentication setting changed |
+
+Step 6A implementation, automated checks and hosted/browser verification are complete. Owner-operated laptop confirmation remains deferred. These results establish route observability and controlled counting, not cold offline operation or field-photo accuracy.
 
 ## Deferred owner check
 
