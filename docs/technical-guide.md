@@ -115,7 +115,7 @@ The owner-run [terminal readers](capacity-routing.md) and [Qwen learning exercis
 ## Next stages
 
 1. Test prepared bead photographs against independently checked counts; report errors, refusals and sensitivity to lighting/settings.
-2. Rehearse the public demo, exports and study/inspection flow; retain synthetic/proxy labels.
+2. Use the [prepared evaluator guide, narration and submission draft](submission/README.md). Final software QA rehearses exports and the study/model/inspection flow; owner recording and checks remain deferred. Retain synthetic/proxy labels.
 3. Keep the optional Firebase connector inactive and unverified for the current delivery. Revisit provider setup and current contest requirements only if Firebase activation is chosen later; connector code alone does not establish eligibility.
 4. Consider shared Supabase storage only when cross-device/team records are needed. Numeric model improvement still requires reliable labels, explicit retraining and fresh held-out evaluation; the current 60% versus 70% synthetic result is unchanged.
 

@@ -2,7 +2,7 @@
 
 A research prototype for **release-container checks, reviewable observations and inspection planning**. This front page explains the network stack and the public-health data system before introducing the application.
 
-[Open the live dashboard](https://workshop-ready-theta.vercel.app/) · [User walkthrough](docs/user-walkthrough.md) · [Technical guide and setup](docs/technical-guide.md) · [Three goals and current workplan](docs/remaining-steps-and-goals.md) · [MIT licence](LICENSE)
+[Open the live dashboard](https://workshop-ready-theta.vercel.app/) · [User walkthrough](docs/user-walkthrough.md) · [Demo and submission pack](docs/submission/README.md) · [Technical guide and setup](docs/technical-guide.md) · [Three goals and current workplan](docs/remaining-steps-and-goals.md) · [MIT licence](LICENSE)
 
 **Delivery goals:** network visibility, a practical public-health collection/review trial, and cloud-first processing with local fallback. Firebase is an optional connector point. Owner-operated laptop/photo checks are scheduled after implementation. See the [remaining steps, owners and hours](docs/remaining-steps-and-goals.md).
 
@@ -113,6 +113,10 @@ The main views are **Overview**, **Image review**, **Container QA**, **Study & r
 
 Start with **[How to use](https://workshop-ready-theta.vercel.app/#guide)** or **Read the walkthrough** on Overview. The six-step guide covers a connected count, human review, preparation/offline reopening, separate photo references, QA/study/inspection records and an optional numeric-model exercise. It remains available offline after preparation and links into the relevant workspaces. A [portable Markdown walkthrough](docs/user-walkthrough.md) includes the same instructions and troubleshooting. Owner laptop, real-photo/field and clarity checks remain deferred; see [6E implementation and evidence](docs/wolbachia-step-6e.md).
 
+### Demo and submission preparation — step 7
+
+The [prepared pack](docs/submission/README.md) contains evaluator instructions, a timed three-minute English narration, a Devpost draft and the later owner checklist. The public demo and a fresh hosted generated-image count were checked. Final QA includes the full synthetic QA → study/model review → inspection-decision/export/reload rehearsal. Owner laptop/photo/field/clarity checks, recording/upload and final submission remain deferred. The current project retains an inactive Firebase connector and does not meet the contest's required Firebase execution/platform integration; see the dated [Step 7 evidence and requirement check](docs/wolbachia-step-7.md).
+
 ### Current release and deployment status
 
 | Available now | Still to verify or build |
@@ -120,7 +124,7 @@ Start with **[How to use](https://workshop-ready-theta.vercel.app/#guide)** or *
 | Vercel and browser bead counter; explicit routing and human review | Prepared-photo error measurements and biological detection validation |
 | Container QA, study checks, real numeric fitting/evaluation and inspection workflow | Field usefulness and any new or improved model |
 | Browser records, history and CSV/JSON/report exports | Shared institutional storage, field devices and intranet deployment |
-| Network/service diagnostics, prepared offline assets, separate photo references and error reports; optional Firebase connector reviewed; connected/offline walkthrough; 121 automated tests, compiled-server check and eleven browser scenarios | Owner-operated laptop/photo/field/clarity checks and live verification of the optional Firebase/Chrome model route |
+| Network/service diagnostics, prepared offline assets, separate photo references and error reports; optional Firebase connector reviewed; walkthrough and demo/submission pack; 121 automated tests, compiled-server check and twelve browser scenarios | Owner laptop/photo/field/clarity checks; recording/upload/submission; required Firebase platform/runtime integration if pursuing that contest |
 
 Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [current workplan](docs/remaining-steps-and-goals.md).
 
