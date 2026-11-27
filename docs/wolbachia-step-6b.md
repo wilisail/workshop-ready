@@ -57,7 +57,22 @@ First preparation requires a connection. Clearing site data or changing browser/
 
 ## Hosted release evidence
 
-CI and public deployment verification are recorded here after the release. The owner check above stays pending until performed.
+The [GitHub CI run](https://github.com/wilisail/workshop-ready/actions/runs/45917910012) passed for release commit `b40b804e2dc6a088675a8d27c29c491de1ad417c`: 111 automated tests, the compiled Node API check, the production build and all seven browser scenarios. CI used Node 22 and Playwright's Chromium 151; the local browser checks also passed on Chromium 158. The cold-start test checks an actual rejected network request independently of the connection hint.
+
+| Item | Verified result |
+| --- | --- |
+| Public app | https://workshop-ready-theta.vercel.app/#settings |
+| Environment / state | Production / READY |
+| Release commit | `b40b804e2dc6a088675a8d27c29c491de1ad417c` |
+| Deployment | `dpl_4V98jpDSGjvLcCnR6KexpVkf337d` |
+| Framework | Vite + React with the existing Node counting function |
+| Build duration | Approximately 50 seconds from provider timestamps |
+| Offline build identifier | `4fac25d3fdcd`, matching the locally tested build |
+| Access | Existing public domain; no audience or authentication change |
+
+On 27 November 2026 at approximately 07:42 WIB, opened the public settings page in the cloud browser without evaluator login. The new offline panel confirmed **10 / 10 assets saved**. Pressing **Prepare offline use** retained that confirmation, and the separate **Check bead service** action returned **Vercel counting service responded**. The HTML build identifier matched the locally tested build. No image or Firebase inference was needed for these checks.
+
+The disconnected workflow was exercised against the production build in local and CI test browsers. The public deployment's asset preparation and service were checked online. **Wili's physical laptop/disconnection check stays deferred**, and real-photo/field evidence remains step 6C. Step 6B implementation, controlled offline verification, CI and the hosted release are complete.
 
 ## References
 

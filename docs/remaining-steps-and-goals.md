@@ -21,7 +21,7 @@ Times below estimate active work, not a promise of elapsed time. They are the re
 | Step | Remaining work / acceptance | Implementer | Wili, deferred | State |
 | --- | --- | --- | --- | --- |
 | 6A | Verify browser → hosted counter and browser-worker paths; show connection hint separately from a checked API response; record source and update the network explanation | 0.5–1 h estimate; implementation finished | 10–15 min, laptop check | Implemented; automated, CI and hosted/browser checks passed; owner check deferred |
-| 6B | Prepare assets locally; verify reopening, counting, record saving, human review and export while disconnected; cloud-first fallback must be observable | 2–3 h estimate; implementation finished | 20–30 min, disconnected-device check | Implemented; 111 automated tests and seven controlled browser scenarios passed locally; owner check deferred |
+| 6B | Prepare assets locally; verify reopening, counting, record saving, human review and export while disconnected; cloud-first fallback must be observable | 2–3 h estimate; implementation finished | 20–30 min, disconnected-device check | Complete: 111 automated tests, seven offline browser scenarios and CI passed; live preparation verified; owner check deferred |
 | 6C | Prepared real bead photos with independent counts; error/missingness report; practical public-health data-entry/review trial with available observations | 1–1.5 h | 30–60 min, photos/reference counts and workflow trial | Pending; depends on owner evidence |
 | 6D | Preserve and document the optional Firebase connector as inactive/unverified; no live Firebase demonstration | 15–30 min | None | Pending connector review |
 | 6E | Finish an accessible connected/offline walkthrough; align README, UI and evidence limitations with verified behaviour | 0.5–1 h | 10–15 min, clarity check | Pending |
@@ -42,7 +42,7 @@ Original estimate before 6A/6B implementation: approximately **7–11 combined w
 ## Next execution order
 
 1. Completed: push this plan and implement/check 6A; owner-operated laptop confirmation remains deferred.
-2. Completed: implement and check 6B without waiting for owner-operated checks; CI/deployment evidence is tracked in the step notes.
+2. Completed: implement, check and release 6B without waiting for owner-operated checks; successful CI and live deployment evidence are in the step notes.
 3. Prepare 6C inputs/report structure, review the optional connector in 6D, and write 6E instructions.
 4. Run owner-operated checks as one later block; keep any missing evidence visibly pending.
 5. Finish step 7 using only results actually demonstrated.
