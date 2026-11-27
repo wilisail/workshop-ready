@@ -20,12 +20,15 @@ async function contents(download) { return readFile(await download.path(), 'utf8
 test('prepared profile cold-reopens offline, counts, saves review, exports, restarts and reconnects', async ({ baseURL }, testInfo) => {
   const profile = await mkdtemp(join(tmpdir(), 'wolbachia-offline-'));
   let context;
+  let page;
   try {
     const open = async offline => {
       context = await chromium.launchPersistentContext(profile, { ...launchOptions, offline, serviceWorkers: 'allow', viewport: { width: 390, height: 844 } });
+      // Apply emulation after the persistent context's initial target exists too.
+      await context.setOffline(offline);
       return context.pages()[0] || context.newPage();
     };
-    let page = await open(false);
+    page = await open(false);
     await page.goto(baseURL + '/#settings'); await ready(page);
     await page.goto(baseURL + '/#review'); await example(page); await count(page);
     await expect(network(page)).toContainText('Actual last count: ' + cloudLabel(baseURL));
@@ -36,6 +39,9 @@ test('prepared profile cold-reopens offline, counts, saves review, exports, rest
     context.on('request', request => { if (new URL(request.url()).pathname === '/api/count-image' && request.method() === 'POST') offlineUploads++; });
     const response = await page.goto(baseURL + '/#review');
     expect(response.fromServiceWorker()).toBe(true);
+    expect(await page.evaluate(async () => {
+      try { await fetch('/api/count-image', { cache: 'no-store' }); return false; } catch { return true; }
+    })).toBe(true);
     await expect(page.getByText('Browser offline', { exact: true })).toBeVisible();
     await example(page); await count(page);
     await expect(network(page)).toContainText('Actual last count: This browser’s worker');
@@ -80,6 +86,9 @@ test('prepared profile cold-reopens offline, counts, saves review, exports, rest
     await count(page); await expect(network(page)).toContainText('Actual last count: ' + cloudLabel(baseURL));
     await expect(page.getByRole('heading', { name: 'Analysis & review history', exact: true })).toBeVisible();
     await testInfo.attach('offline-audit', { body: JSON.stringify(audit, null, 2), contentType: 'application/json' });
+  } catch (error) {
+    console.log('Cold-start diagnostic:', await page?.evaluate(() => ({ online: navigator.onLine, controller: !!navigator.serviceWorker.controller, body: document.body.innerText.slice(0, 2200) })).catch(() => 'Page unavailable'));
+    throw error;
   } finally { await context?.close(); await rm(profile, { recursive: true, force: true }); }
 });
 
