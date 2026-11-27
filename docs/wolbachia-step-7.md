@@ -2,7 +2,7 @@
 
 Updated: 27 November 2026 (WIB).
 
-**The implementer's QA and preparation are complete locally. Owner checks, recording/upload and final submission remain deferred.** Nothing has been submitted to Devpost or YouTube. The [submission pack](submission/README.md) contains the evaluator guide, timed narration, project draft and recording checklist.
+**The implementer's QA and preparation are complete, pushed to main and verified in CI. Owner checks, recording/upload and final submission remain deferred.** Nothing has been submitted to Devpost or YouTube. The [submission pack](submission/README.md) contains the evaluator guide, timed narration, project draft and recording checklist.
 
 ## Final software verification
 
@@ -41,7 +41,13 @@ This is a technical gap assessment, not organizer approval. The current project 
 
 ## Release evidence
 
-The preparation/source CI result is recorded after the pack is pushed. The already deployed app remains the checked 6E source above.
+- Preparation/test source: [`878af850c49ac46f5e543eb509f0f9680e53ba12`](https://github.com/wilisail/workshop-ready/commit/878af850c49ac46f5e543eb509f0f9680e53ba12).
+- [GitHub CI run 45961150842](https://github.com/wilisail/workshop-ready/actions/runs/45961150842) passed all 121 automated tests, the compiled Node API smoke check, production build and twelve Chromium browser scenarios.
+- The pack contains a 320-word primary English narration with a timed three-minute scene plan, an alternative for unavailable disconnected footage, evaluator controls/expected results and an honest provider disclosure. The final video itself remains unrecorded/unpublished.
+- Repository comparison confirmed no application, API, build configuration or dependency changes in step 7. The checked live app therefore remains the 6E source/deployment/build above; no documentation-only redeployment was needed.
+- Changed Markdown file links resolve, the source worktree is synced, and the rules deadline conversion was checked with America/Los_Angeles and Asia/Jakarta time zones.
+
+Independent preparation is finished. These checks do not complete the owner's pending evidence or establish Firebase contest compliance.
 
 ## Remaining owner work
 
