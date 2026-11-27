@@ -23,14 +23,16 @@ The local image engine is deterministic CV for bead proxies, not a trained biolo
 | Scenario | Observed result |
 | --- | --- |
 | Full browser restart with networking disabled | A prepared persistent browser profile reopened the app from its service worker; the test asserts the navigation response came from that worker |
-| New work while offline | A fresh generated eight-bead record was saved and counted as 8 locally, with zero counting POST requests; a separate human correction to 0 was saved |
+| New work while offline | A fresh generated eight-bead record was saved and counted as 8 locally with no hosted counting response; an uncached API fetch independently confirmed blocked networking, and a separate human correction to 0 was saved |
 | Offline export and second restart | CSV and JSON downloads retained original estimate 8, reviewed count 0, runtime and generated-proxy provenance; the review survived another complete browser restart |
 | Reconnection | The chosen cloud-first policy used the real HTTP counter again; original history remained and a new count required a fresh review |
 | Missing worker asset | Preparation stayed unconfirmed offline; reconnecting and repairing restored the complete cache |
 | Mixed-release HTML | An HTML build mismatch stayed unconfirmed and was repaired from the connected origin |
-| Other failures and restrictions | Connected service failure used permitted worker fallback; cloud-only stayed blocked offline; failed initial caching could be retried; a never-prepared profile could not cold-open offline |
+| Other failures and restrictions | Connected service failure used permitted worker fallback; cloud-only stayed blocked offline; device-only made zero counting POST requests; failed initial caching could be retried; a never-prepared profile could not cold-open offline |
 
 The persistent-profile test also checked the 390 px layout for page overflow and confirmed no `/api/` requests were stored in the app cache. These are controlled software checks with a synthetic proxy; they are not a physical test of Wili's laptop, real-photo accuracy or public-health effectiveness.
+
+The test proves network isolation with a rejected uncached API request, not the browser's online hint. CI's Chromium can retain a connected hint when a persistent profile cold-starts with networking disabled; cloud-first must still recover to the local worker. Device-only is separately checked to make no image-service POST request at all.
 
 ### Reproduce the checks
 
