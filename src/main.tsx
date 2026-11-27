@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App.tsx';
+import { registerOfflineSupport } from './lib/offline.ts';
 import './styles.css';
 import './notes.css';
 import './qa.css';
@@ -11,9 +12,7 @@ import './inspection.css';
 createRoot(document.getElementById('root')!).render(<React.StrictMode><App /></React.StrictMode>);
 
 if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {
-      window.dispatchEvent(new Event('workshop-cache-error'));
-    });
-  });
+  const prepare = () => { void registerOfflineSupport().catch(() => window.dispatchEvent(new Event('workshop-offline-change'))); };
+  window.addEventListener('load', prepare);
+  window.addEventListener('online', prepare);
 }

@@ -48,7 +48,13 @@ Open **Data & settings** or **Image review → Your saved images** for the **Net
 | Browser → local worker | Pixels transferred within the device; no image upload | `browser-worker` in the saved result |
 | Browser → IndexedDB/localStorage | Local images, results and workspace records | Browser-local persistence and exports; no shared database sync |
 
-Cloud-first permits worker fallback on service failure. Cloud-only and device-only retain their restrictions; integrity failures are surfaced rather than replaced with a fallback answer. The local capability check does not execute a count or establish cold offline reopening. See [6A implementation and verification](docs/wolbachia-step-6a.md); disconnected reopening and complete workflow verification remain step 6B.
+Cloud-first permits worker fallback on service failure. Cloud-only and device-only retain their restrictions; integrity failures are surfaced rather than replaced with a fallback answer. The local capability check does not execute a count or establish cold offline reopening. See [6A implementation and verification](docs/wolbachia-step-6a.md) and the completed controlled offline checks in [step 6B](docs/wolbachia-step-6b.md).
+
+### Prepared offline use — step 6B
+
+**Data & settings → Prepare for offline use** confirms that this app version and every required asset, including its counting worker, are saved on this browser. Prepare while connected, then reopen the same link in the same browser/profile without internet. Cloud-first then permits local bead counting, record saving, human review and CSV/JSON export. Reconnecting restores permitted hosted computation while the records stay local.
+
+Cold reopening, a second complete browser restart, offline review/export, cache repair, a mixed-release guard and reconnection passed in seven controlled browser scenarios. The suite also verifies that a never-prepared browser cannot cold-open offline and that cloud-only remains blocked. Wili's own laptop check is deferred. See [the implementation, evidence and short offline checklist](docs/wolbachia-step-6b.md). This fallback is small classical CV, separate from the optional Firebase/local language-model route.
 
 ## 2. Wolbachia collection, evidence and ML system
 
@@ -102,7 +108,7 @@ The main views are **Overview**, **Image review**, **Container QA**, **Study & r
 | Vercel and browser bead counter; explicit routing and human review | Prepared-photo error measurements and biological detection validation |
 | Container QA, study checks, real numeric fitting/evaluation and inspection workflow | Field usefulness and any new or improved model |
 | Browser records, history and CSV/JSON/report exports | Shared institutional storage, field devices and intranet deployment |
-| Network/service diagnostics, actual runtime labels and 104 automated tests plus the compiled-server check | Cold offline reopening, owner-operated laptop checks and the optional Firebase/Chrome model route |
+| Network/service diagnostics, prepared offline assets, 111 automated tests plus the compiled-server check and seven offline browser scenarios | Owner-operated laptop checks and the optional Firebase/Chrome model route |
 
 Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [current workplan](docs/remaining-steps-and-goals.md).
 

@@ -2,6 +2,8 @@
 
 Updated 22 November 2026 (WIB), release 0.8.0.
 
+**27 November update:** [step 6B](wolbachia-step-6b.md) adds verified app-asset preparation, controlled cold offline reopening and local review/export tests. The older release verification below is retained as history; Wili's own laptop test remains deferred.
+
 ## Scope
 
 The product can run without Firebase, App Check, Google Cloud billing or a model API key. Vercel hosts the interface and a CPU-only image-processing function. The same deterministic counter can run in a browser worker. Numeric logistic training/evaluation, QA/study records and inspection planning retain their existing browser-local behavior.

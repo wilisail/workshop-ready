@@ -13,8 +13,9 @@ export async function executeCounterRoute<T>(mode: ProcessingMode, online: boole
   if (mode === 'local' && !localReady) throw new Error('This browser cannot start the local image worker. No cloud request was made.');
   if (mode === 'cloud' && !online) throw new Error('Vercel-only needs an internet connection. Choose this-device mode for local counting.');
   if (!online && !localReady) throw new Error('No counting route is available while offline. Human review remains available.');
+  const preferred = mode === 'local' || mode === 'hybrid' ? 'device' : 'cloud';
   const first = mode === 'local' || !online || mode === 'hybrid' && localReady ? 'device' : 'cloud';
-  try { const value = await (first === 'cloud' ? server() : device()); signal.throwIfAborted(); return { value, used: first, fallback: false }; }
+  try { const value = await (first === 'cloud' ? server() : device()); signal.throwIfAborted(); return { value, used: first, fallback: first !== preferred }; }
   catch (error) {
     signal.throwIfAborted();
     if (error instanceof CounterIntegrityError || mode === 'local' || mode === 'cloud' || first === 'device' && !online || first === 'cloud' && !localReady) throw error;

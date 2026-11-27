@@ -252,3 +252,7 @@ td>strong { color: #30476b; }
 .network-check { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 0 18px 16px; }
 .network-check span { font-size: .75rem; color: #62677d; }
 @media (max-width: 600px) { .network-facts { grid-template-columns: minmax(0,1fr); } }
+.offline-panel { margin: 0 0 18px; min-width: 0; }
+.offline-preparation-state { margin: 0 0 10px; color: #343864; }
+.offline-steps { padding-left: 20px; font-size: .8125rem; line-height: 1.7; color: #50566d; }
+.offline-panel .button-row { flex-wrap: wrap; }
