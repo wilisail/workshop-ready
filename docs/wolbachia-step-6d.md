@@ -40,7 +40,13 @@ These tests establish the inactive connector boundary, not a working Firebase pr
 
 ## Release evidence
 
-Source CI and production verification will be recorded here after release. No live Firebase count is part of that verification.
+- Source release: [`fa8d1df077aed39eccc5d8cde874078f003dfe5b`](https://github.com/wilisail/workshop-ready/commit/fa8d1df077aed39eccc5d8cde874078f003dfe5b), including the connector review and strengthened configuration-saving regression.
+- [GitHub CI run 45951801663](https://github.com/wilisail/workshop-ready/actions/runs/45951801663) passed all 121 automated tests, the compiled Node API smoke check, production build and ten Chromium browser scenarios.
+- Vercel production deployment `dpl_3GS3A9fXUaXwxufkQT9MFZXhY5Zt` reached **READY** for that source commit. The public [Data & settings page](https://workshop-ready-theta.vercel.app/#settings) was opened and checked on 27 November 2026 (WIB).
+- The live page selected the small bead counter with Vercel preferred/browser fallback, displayed **Inactive · not configured**, and explained that saving does not switch the image method or verify a connection. No Firebase configuration or count was submitted during this production check.
+- Offline build `2cf7d41c7f63` matched the locally tested build, and the live verification browser confirmed **10/10 assets saved**. Owner-operated laptop confirmation remains deferred.
+
+The 6D review and status-label release are complete. Live Firebase integration remains unverified and outside the current delivery.
 
 ## Remaining work
 
