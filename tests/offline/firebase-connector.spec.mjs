@@ -33,6 +33,7 @@ test('optional Firebase settings and selection stay idle until an explicit count
   await expect(page.getByRole('button', { name: 'Save human review', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Optional Firebase settings', exact: true }).click();
   await expect(connector).toContainText('Inactive · not configured');
+  await page.getByRole('combobox', { name: 'Image counting method', exact: true }).selectOption('bead_cv');
 
   await page.getByLabel('Firebase web app configuration', { exact: false }).fill(JSON.stringify({
     apiKey: 'dummy-public-key-connector-test-only', projectId: 'connector-test-only', appId: 'dummy-web-app-test-only',
@@ -40,9 +41,11 @@ test('optional Firebase settings and selection stay idle until an explicit count
   await page.getByLabel('App Check site key', { exact: true }).fill('dummy-public-site-key-test-only');
   await page.getByLabel('Cloud model ID', { exact: true }).fill('connector-test-no-live-model');
   await page.getByRole('button', { name: 'Save Firebase settings', exact: true }).click();
-  await expect(connector).toContainText('Selected · unverified');
-  await expect(page.getByRole('combobox', { name: 'Image counting method', exact: true })).toHaveValue('firebase');
+  await expect(connector).toContainText('Inactive · configuration saved');
+  await expect(page.getByRole('combobox', { name: 'Image counting method', exact: true })).toHaveValue('bead_cv');
   await expect(page.getByText('Firebase configuration saved. A live connection has not been tested.', { exact: true })).toBeVisible();
+  await page.getByRole('combobox', { name: 'Image counting method', exact: true }).selectOption('firebase');
+  await expect(connector).toContainText('Selected · unverified');
   await page.reload();
   await expect(connector).toContainText('Selected · unverified');
   await openView('Image review');
@@ -60,7 +63,8 @@ test('optional Firebase settings and selection stay idle until an explicit count
   await openView('Image review');
   await page.getByRole('button', { name: 'Count this image', exact: true }).click();
   await expect(page.getByText('Computed result saved with its actual execution source. Human review is still required.', { exact: true })).toBeVisible();
-  await expect(page.getByRole('region', { name: 'Network and processing', exact: true })).toContainText('Actual last count: Development Node service');
+  const runtime = baseURL.startsWith('http://127.0.0.1:') ? 'Development Node service' : 'Vercel function';
+  await expect(page.getByRole('region', { name: 'Network and processing', exact: true })).toContainText('Actual last count: ' + runtime);
   expect(countRequests).toHaveLength(1);
   expect(providerRequests).toEqual([]);
 });
