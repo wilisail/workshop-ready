@@ -26,7 +26,13 @@ The new controlled browser scenario follows the walkthrough at a 390 px viewport
 
 ## Release evidence
 
-Source CI and live deployment checks are recorded here after release. Actual laptop/photo/field/clarity evidence remains deferred.
+- Source release: [`8ca9f9940aab5e52242c8435fd2af8f61eb301dc`](https://github.com/wilisail/workshop-ready/commit/8ca9f9940aab5e52242c8435fd2af8f61eb301dc).
+- [GitHub CI run 45956997892](https://github.com/wilisail/workshop-ready/actions/runs/45956997892) passed all 121 automated tests, the compiled Node API smoke check, production build and eleven Chromium browser scenarios.
+- Vercel production deployment `dpl_5hAw2bdAQFnMZGap9Zydn1QHs8xv` reached **READY** for that source commit. The public [How to use view](https://workshop-ready-theta.vercel.app/#guide) was opened and checked on 27 November 2026 (WIB).
+- The live guide displayed all six steps and the three goals. Its processing-settings link opened the expected panel, showing the small counter, cloud-first preference, **Inactive · not configured** Firebase connector and **10/10 assets saved**. Its image-test link selected **Your image tests** with the saved generated examples; prepared-photo measurements stayed pending. The guide was kept open for review.
+- Deployed offline build `4ec87068b33c` matched the locally tested build. Full disconnected walkthrough behaviour is covered by the controlled browser scenario; the live asset confirmation is not an owner-operated laptop check.
+
+The 6E software walkthrough and release are complete. Actual laptop/photo/field/clarity evidence remains deferred. No live Firebase request, actual field observation or external submission was made during production verification.
 
 ## Next
 
