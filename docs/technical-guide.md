@@ -77,7 +77,11 @@ The optional **Firebase vision model** engine retains its separate adapter and m
 
 ## Optional Firebase adapter (deferred)
 
-1. Connect the official Firebase plugin/MCP when available, then create/select a Firebase project and register a Web app using supported authorized operations. See [connection and automation options](firebase-connection-options.md).
+**The current delivery preserves this connector without configuring or demonstrating it.** Step 6D reviews the inactive boundary and labels; it does not establish a working provider connection. The small counter defaults to Vercel with browser fallback and never falls back to Firebase. Saved settings and engine selection are separate; see [6D evidence](wolbachia-step-6d.md).
+
+The following setup applies only if Firebase activation is chosen later:
+
+1. Create/select an authorized Firebase project and registered Web app using the supported operations available then. See [deferred connection options](firebase-connection-options.md).
 2. Enable Firebase AI Logic and a supported image-capable cloud model.
 3. Set up App Check with reCAPTCHA Enterprise and allow the deployed domain.
 4. Enter the public Firebase web configuration, public App Check site key and model ID in **Data & settings**, or use the public variables in [.env.example](../.env.example).
@@ -109,7 +113,7 @@ The owner-run [terminal readers](capacity-routing.md) and [Qwen learning exercis
 
 1. Test prepared bead photographs against independently checked counts; report errors, refusals and sensitivity to lighting/settings.
 2. Rehearse the public demo, exports and study/inspection flow; retain synthetic/proxy labels.
-3. Optionally connect Firebase and verify current contest requirements if pursuing Firebase judging. The independent Vercel/browser counter is not a substitute for required Firebase AI Logic/App Check integration.
+3. Keep the optional Firebase connector inactive and unverified for the current delivery. Revisit provider setup and current contest requirements only if Firebase activation is chosen later; connector code alone does not establish eligibility.
 4. Consider shared Supabase storage only when cross-device/team records are needed. Numeric model improvement still requires reliable labels, explicit retraining and fresh held-out evaluation; the current 60% versus 70% synthetic result is unchanged.
 
 See [step 1 scope](wolbachia-step-1.md), [step 2 implementation notes](wolbachia-step-2.md) and [step 3 implementation/test boundary](wolbachia-step-3.md). Historical workshop setup notes are archived [here](legacy-workshop-readme.md).
@@ -120,7 +124,7 @@ See [step 1 scope](wolbachia-step-1.md), [step 2 implementation notes](wolbachia
 
 The tracked Site manifest preserves the private static review deployment. That host has no Node counting API, so use the explicitly permitted browser fallback or device-only mode. Firebase Hosting configuration is retained for an optional future route, not required for the current product.
 
-The repository remains private. A public demo alone does not establish Firebase contest eligibility; required Firebase integration, public licensed source and other current rules must be satisfied if entering that judging track.
+The GitHub repository is public (metadata checked 27 November 2026). Source visibility and a public demo do not establish Firebase contest eligibility; any required integration and current submission rules need their own verification if that judging track is pursued.
 
 ## License
 

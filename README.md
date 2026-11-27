@@ -62,6 +62,10 @@ Saved uploaded images now support separate reference counts with method, counter
 
 The default prepared-photo report remains pending until qualifying evidence is entered. Controlled synthetic tests establish software behaviour, including offline entry/export; actual owner photos and field usefulness remain unverified. See the [6C implementation notes](docs/wolbachia-step-6c.md), [deferred trial checklist](docs/field-trial-checklist.md) and [blank worksheets](docs/templates/).
 
+### Optional Firebase connector review — step 6D
+
+Firebase adapter code is retained and inactive by default. Settings distinguish inactive configuration from a selected, unverified method. Saving configuration does not switch the image engine or verify a connection; the small counter never routes to Firebase. No Firebase setup or live demonstration is included in the current delivery. See [6D review and verification](docs/wolbachia-step-6d.md) and [deferred connection options](docs/firebase-connection-options.md).
+
 ## 2. Wolbachia collection, evidence and ML system
 
 The focus is **operational quality assurance (QA)**: keeping observations traceable and helping people decide what to inspect. The illustrated release-container programme introduces Wolbachia-carrying mosquitoes; it is distinct from a trap intended to collect adult specimens. These diagrams explain data roles, not rearing or release instructions.
@@ -114,7 +118,7 @@ The main views are **Overview**, **Image review**, **Container QA**, **Study & r
 | Vercel and browser bead counter; explicit routing and human review | Prepared-photo error measurements and biological detection validation |
 | Container QA, study checks, real numeric fitting/evaluation and inspection workflow | Field usefulness and any new or improved model |
 | Browser records, history and CSV/JSON/report exports | Shared institutional storage, field devices and intranet deployment |
-| Network/service diagnostics, prepared offline assets, separate photo references and error reports; 121 automated tests, the compiled-server check and nine browser scenarios | Owner-operated laptop/photo/field checks and the optional Firebase/Chrome model route |
+| Network/service diagnostics, prepared offline assets, separate photo references and error reports; optional Firebase connector reviewed; 121 automated tests, compiled-server check and ten browser scenarios | Owner-operated laptop/photo/field checks and live verification of the optional Firebase/Chrome model route |
 
 Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [current workplan](docs/remaining-steps-and-goals.md).
 
