@@ -22,12 +22,12 @@ Times below estimate active work, not a promise of elapsed time. They are the re
 | --- | --- | --- | --- | --- |
 | 6A | Verify browser → hosted counter and browser-worker paths; show connection hint separately from a checked API response; record source and update the network explanation | 0.5–1 h estimate; implementation finished | 10–15 min, laptop check | Implemented; automated, CI and hosted/browser checks passed; owner check deferred |
 | 6B | Prepare assets locally; verify reopening, counting, record saving, human review and export while disconnected; cloud-first fallback must be observable | 2–3 h estimate; implementation finished | 20–30 min, disconnected-device check | Complete: 111 automated tests, seven offline browser scenarios and CI passed; live preparation verified; owner check deferred |
-| 6C | Prepared real bead photos with independent counts; error/missingness report; practical public-health data-entry/review trial with available observations | 1–1.5 h | 30–60 min, photos/reference counts and workflow trial | Pending; depends on owner evidence |
+| 6C | Prepared real bead photos with independent counts; error/missingness report; practical public-health data-entry/review trial with available observations | 1–1.5 h estimate; preparation implemented | 30–60 min, photos/reference counts and workflow trial | Reference/history/error reporting and blank trial pack ready; controlled checks passed; real-photo/field evidence deferred |
 | 6D | Preserve and document the optional Firebase connector as inactive/unverified; no live Firebase demonstration | 15–30 min | None | Pending connector review |
 | 6E | Finish an accessible connected/offline walkthrough; align README, UI and evidence limitations with verified behaviour | 0.5–1 h | 10–15 min, clarity check | Pending |
 | 7 | End-to-end QA, evaluator access, demo sequence, narration and submission text | 1–1.5 h | 30–45 min, record/upload/submit | Pending |
 
-Original estimate before 6A/6B implementation: approximately **7–11 combined working hours**. Remaining after their implementation: about **3–4.5 hours of implementer work plus 2–3 hours of owner checks**, or **5–7.5 combined working hours**. New defects and upload/collection delays may add time. Completed work is not charged again.
+Original estimate before 6A/6B implementation: approximately **7–11 combined working hours**. Remaining after 6A–6C preparation: about **2–3 hours of implementer work plus 2–3 hours of owner checks**, or **4–6 combined working hours**. New defects and upload/collection delays may add time. Completed work is not charged again.
 
 ## Existing evidence and limits
 
@@ -43,7 +43,7 @@ Original estimate before 6A/6B implementation: approximately **7–11 combined w
 
 1. Completed: push this plan and implement/check 6A; owner-operated laptop confirmation remains deferred.
 2. Completed: implement, check and release 6B without waiting for owner-operated checks; successful CI and live deployment evidence are in the step notes.
-3. Prepare 6C inputs/report structure, review the optional connector in 6D, and write 6E instructions.
+3. 6C inputs, reference/reporting workflow and trial pack are prepared; owner evidence remains deferred. Next independent work is the optional connector review in 6D and the 6E walkthrough.
 4. Run owner-operated checks as one later block; keep any missing evidence visibly pending.
 5. Finish step 7 using only results actually demonstrated.
 
@@ -53,3 +53,5 @@ Original estimate before 6A/6B implementation: approximately **7–11 combined w
 - Live app: https://workshop-ready-theta.vercel.app/
 - Network implementation and step 6A evidence: [step 6A notes](wolbachia-step-6a.md).
 - Offline preparation, verification and deferred owner checklist: [step 6B notes](wolbachia-step-6b.md).
+
+- Photo validation and deferred practical trial: [step 6C notes](wolbachia-step-6c.md) and [owner checklist](field-trial-checklist.md).

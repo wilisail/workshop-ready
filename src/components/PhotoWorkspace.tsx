@@ -3,6 +3,10 @@ import type { FormEvent } from 'react';
 import Icon from './Icon.tsx';
 import CounterControls from './CounterControls.tsx';
 import NetworkStatus from './NetworkStatus.tsx';
+import PhotoReferenceEditor from './PhotoReferenceEditor.tsx';
+import PhotoValidationReport from './PhotoValidationReport.tsx';
+import { currentReference } from '../lib/photo-reference.ts';
+import type { PhotoReferenceInput } from '../lib/photo-reference.ts';
 import { defaultCounterOptions } from '../lib/bead-counter.ts';
 import { countImageWithoutFirebase, localCounterReady } from '../lib/counter-runtime.ts';
 import { COUNTER_MODES } from '../lib/counter-routing.ts';
@@ -114,6 +118,14 @@ export default function PhotoWorkspace({settings,mode,engine,onEngine,onMode,onC
     }catch(err){setError(err instanceof Error?err.message:'The review could not be saved.');}
     finally{busyRef.current=false;setBusy(null);}
   }
+  async function saveReference(input: PhotoReferenceInput) {
+    if (!store || !selected || busyRef.current) throw new Error('Wait for the current image operation to finish.');
+    busyRef.current = true; setBusy('review');
+    try {
+      await store.appendReference(selected.id, currentReference(selected)?.id || null, input);
+      await reload(selected.id); onNotice('Separate reference saved with its declaration history. Computed estimates and human corrections were retained.');
+    } finally { busyRef.current = false; setBusy(null); }
+  }
   async function loadExample() {
     if(!store||busyRef.current)return;
     busyRef.current=true;setBusy('review');setError('');
@@ -135,8 +147,10 @@ export default function PhotoWorkspace({settings,mode,engine,onEngine,onMode,onC
 
     </section>
     <section className="panel decision-panel"><div className="panel-title"><div><h2>Count & human review</h2><p>{latest?'Original computed result is preserved':'No computed result for this image'}</p></div></div><div className="estimate-box"><span>{latest?'Original computed estimate':'Computed estimate'}</span><strong>{latest?.count??'—'}</strong><span>{latest?latest.countable?'Visible objects only':'This method could not count this image':'No count has been computed'}</span>{latest&&<><span className={'source-tag source-'+latest.source}>{latest.execution==='vercel-function'?'Counted on Vercel':latest.execution==='browser-worker'?'Counted in this browser':latest.execution==='development-server'?'Counted on development server':latest.source==='cloud'?'Processed in cloud':'Processed on device'}</span><span>{latest.model} · {(latest.elapsedMs/1000).toFixed(1)}s</span><span>{latest.routingNote}</span></>}</div>{latest&&<div className="photo-quality"><p>{latest.explanation}</p>{latest.qualityWarnings.length>0&&<ul>{latest.qualityWarnings.map((warning,i)=><li key={i}>{warning}</li>)}</ul>}</div>}{review&&<div className={'photo-reviewed-value '+(review.status==='rejected'?'photo-rejected-value':'')}><Icon name={review.status==='rejected'?'close':'check'} size={16}/><span>{review.status==='reviewed'?'Reviewed count: '+review.count:'Observation rejected'}<small>{review.reviewer} · {shortDate(review.createdAt)}</small></span></div>}{selected&&<ReviewFields key={selected.id+':'+(latest?.id||'manual')+':'+(review?.id||'pending')} record={selected} busy={!!busy} onSave={saveReview}/>}</section></div>
+    {selected&&<PhotoReferenceEditor key={selected.id+":"+(currentReference(selected)?.id||"new")} record={selected} busy={!!busy} onSave={saveReference}/>}
     {selected&&<section className="panel photo-audit-panel"><div className="panel-title"><div><h2>Analysis & review history</h2><p>{selected.analyses.length} analyses · {selected.reviews.length} human reviews · image {selected.sha256.slice(0,12)}…</p></div><button className="button secondary" onClick={()=>download('image-audit-'+selected.id+'.json',photoAudit(selected),'application/json')}><Icon name="download" size={16}/>Export audit JSON</button></div><div className="photo-audit-events">{!selected.analyses.length&&!selected.reviews.length&&<p className="helper">No computed analysis or human review yet. Saving the photo did not start counting.</p>}{[...selected.analyses.map(a=>({id:a.id,time:a.createdAt,title:(a.source==='cloud'?'Cloud':'On-device')+' analysis · '+(a.count===null?'unable to count':a.count+' estimated'),detail:a.model+' · '+a.routingNote})),...selected.reviews.map(r=>({id:r.id,time:r.createdAt,title:r.status==='rejected'?'Rejected by '+r.reviewer:'Human count '+r.count+' · '+r.reviewer,detail:(r.analysisId?'Review of analysis '+r.analysisId.slice(0,8):'Manual review; no AI estimate')+(r.note?' · '+r.note:'')}))].sort((a,b)=>b.time.localeCompare(a.time)).map(event=><article key={event.id}><span><Icon name="clock" size={16}/></span><div><strong>{event.title}</strong><p>{event.detail}</p></div><time dateTime={event.time}>{shortDate(event.time,true)}</time></article>)}</div></section>}
     </>}
+    <PhotoValidationReport records={records} busy={!!busy}/>
     {importing&&store&&<ImportPhoto store={store} onClose={()=>setImporting(false)} onSaved={id=>{setImporting(false);setFilter('all');setQuery('');reload(id).catch(err=>setError(imageError(err)));onNotice('Image saved in this browser. No AI request was made.');}}/>}
   </div>;
 }

@@ -256,3 +256,28 @@ td>strong { color: #30476b; }
 .offline-preparation-state { margin: 0 0 10px; color: #343864; }
 .offline-steps { padding-left: 20px; font-size: .8125rem; line-height: 1.7; color: #50566d; }
 .offline-panel .button-row { flex-wrap: wrap; }
+.photo-reference-panel,.photo-validation-panel { margin: 18px 0; min-width: 0; }
+.reference-details,.validation-content { padding: 16px 18px; }
+.reference-details summary,.validation-inventory summary { cursor: pointer; font-weight: 600; font-size: .8125rem; color: #343864; }
+.reference-form { margin-top: 15px; }
+.reference-form fieldset { border: 1px solid #c4c7d3; margin: 14px 0; padding: 12px; }
+.reference-form legend { font-size: .8125rem; color: #50566d; }
+.reference-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.reference-wide { grid-column: 1/-1; }
+.reference-form label,.validation-content>label { display: block; margin: 8px 0 6px; font-size: .8125rem; }
+.reference-form input:not([type="checkbox"]),.reference-form select,.validation-content>select { width: 100%; min-width: 0; border: 1px solid #b4b8ca; border-radius: 2px; padding: 9px; background: #fff; font: inherit; font-size: .8125rem; }
+.reference-form label.reference-check { display: flex; align-items: center; gap: 8px; }
+.reference-check input { width: auto; flex: 0 0 auto; }
+.validation-totals { display: grid; grid-template-columns: repeat(auto-fit,minmax(115px,1fr)); gap: 12px; margin: 18px 0; }
+.validation-totals dt { color: #62677d; font-size: .75rem; }
+.validation-totals dd { margin: 4px 0 0; font-size: 1.125rem; color: #343864; font-weight: 600; }
+.validation-state { font-size: .875rem; font-weight: 600; color: #343864; }
+.validation-table-wrap { overflow-x: auto; max-width: 100%; margin: 14px 0; }
+.validation-table-wrap table { width: 100%; border-collapse: collapse; font-size: .75rem; }
+.validation-table-wrap caption { text-align: left; color: #62677d; padding: 0 0 8px; }
+.validation-table-wrap td,.validation-table-wrap th { border: 1px solid #c4c7d3; text-align: left; padding: 8px; min-width: 75px; }
+.validation-table-wrap th { background: #edf0f8; }
+.validation-checks { padding-left: 20px; font-size: .8125rem; line-height: 1.7; color: #50566d; }
+.validation-content .button-row { flex-wrap: wrap; }
+.validation-inventory { margin: 16px 0; }
+@media (max-width: 600px) { .reference-grid { grid-template-columns: minmax(0,1fr); } }

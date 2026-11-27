@@ -1,11 +1,14 @@
 import { LOCATIONS, validateReviewCount } from './dashboard.ts';
 import type { ImageAnalysis, ImageKind } from './image-analysis.ts';
+import { currentReference, makePhotoReference } from './photo-reference.ts';
+import type { PhotoReference, PhotoReferenceInput } from './photo-reference.ts';
 
 export interface PhotoReview { id: string; analysisId: string | null; status: 'reviewed' | 'rejected'; count: number | null; note: string; reviewer: string; createdAt: string; }
 export interface PhotoRecord {
   id: string; name: string; container: string; locationId: string; capturedOn: string; createdAt: string;
   kind: ImageKind; sha256: string; mimeType: string; width: number; height: number; size: number;
   provenance: 'user_upload' | 'generated_proxy'; referenceCount?: number; locationProvenance: 'mock'; analyses: ImageAnalysis[]; reviews: PhotoReview[];
+  references?: PhotoReference[];
 }
 export function currentReview(record: PhotoRecord): PhotoReview | undefined {
   const review = record.reviews.at(-1);
@@ -50,7 +53,7 @@ export function createPhotoStore(factory: IDBFactory, databaseName = PHOTO_DB) {
     async getImage(id: string): Promise<Blob> { const db = await open(); return new Promise((resolve,reject) => { const request = db.transaction('images').objectStore('images').get(id); request.onsuccess = () => request.result instanceof Blob ? resolve(request.result) : reject(new Error('The stored image file is missing.')); request.onerror = () => reject(request.error); }); },
     async add(record: PhotoRecord, blob: Blob): Promise<void> {
       validatePhotoMetadata(record);
-      if (!/^[a-f0-9]{64}$/.test(record.sha256) || record.size !== blob.size || record.mimeType !== blob.type || !['user_upload','generated_proxy'].includes(record.provenance) || record.locationProvenance !== 'mock' || record.analyses.length || record.reviews.length || (record.referenceCount !== undefined && (record.provenance !== 'generated_proxy' || !Number.isInteger(record.referenceCount) || record.referenceCount < 0))) throw new Error('The new image record failed validation.');
+      if (!/^[a-f0-9]{64}$/.test(record.sha256) || record.size !== blob.size || record.mimeType !== blob.type || !['user_upload','generated_proxy'].includes(record.provenance) || record.locationProvenance !== 'mock' || record.analyses.length || record.reviews.length || record.references?.length || (record.referenceCount !== undefined && (record.provenance !== 'generated_proxy' || !Number.isInteger(record.referenceCount) || record.referenceCount < 0))) throw new Error('The new image record failed validation.');
       const db = await open();
       return new Promise((resolve,reject) => {
         const tx = db.transaction(['records','images'],'readwrite'); let failure: Error | undefined;
@@ -68,6 +71,11 @@ export function createPhotoStore(factory: IDBFactory, databaseName = PHOTO_DB) {
       if (review.status === 'rejected' && !review.note.trim()) throw new Error('A rejected image needs a reason.');
       if (!review.reviewer.trim() || review.reviewer.length > 80 || review.note.length > 500) throw new Error('Add a reviewer label and keep the note under 500 characters.');
       return { ...record, reviews: [...record.reviews,{ ...review, count: review.status === 'reviewed' ? review.count : null }] };
+    }); },
+    appendReference(id: string, expectedReferenceId: string | null, input: PhotoReferenceInput) { return change(id, record => {
+      if ((currentReference(record)?.id || null) !== expectedReferenceId) throw new Error('This reference changed in another tab. Refresh before amending it.');
+      const reference = makePhotoReference(record, input, crypto.randomUUID(), new Date().toISOString());
+      return { ...record, references: [...(record.references || []), reference] };
     }); },
     async close() { if (opened) (await opened).close(); opened = undefined; },
   };

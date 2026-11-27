@@ -125,3 +125,7 @@ The repository remains private. A public demo alone does not establish Firebase 
 ## License
 
 Application code and authored demonstration material: MIT. llama.cpp and Qwen retain their upstream licenses.
+
+## Separate photo references and practical trial preparation
+
+Step 6C adds reference declarations and a scoped descriptive error report in Image review. Unknown counts, exclusions, duplicates, repeated setups and method/settings groups remain explicit. Human corrections do not overwrite computed estimates. See [6C notes](wolbachia-step-6c.md) and the [deferred owner checklist](field-trial-checklist.md). Real-photo and field usefulness remain unverified until owner evidence is collected.

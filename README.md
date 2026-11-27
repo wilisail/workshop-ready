@@ -56,6 +56,12 @@ Cloud-first permits worker fallback on service failure. Cloud-only and device-on
 
 Cold reopening, a second complete browser restart, offline review/export, cache repair, a mixed-release guard and reconnection passed in seven controlled browser scenarios. The suite also verifies that a never-prepared browser cannot cold-open offline and that cloud-only remains blocked. Wili's own laptop check is deferred. See [the implementation, evidence and short offline checklist](docs/wolbachia-step-6b.md). This fallback is small classical CV, separate from the optional Firebase/local language-model route.
 
+### Photo validation and practical trial preparation — step 6C
+
+Saved uploaded images now support separate reference counts with method, counter, physical unit, evidence type, independence/blinding declarations, exclusions and amendment history. **Photo validation report** compares original computed counts with those references, showing missing/excluded pairs, duplicate images, repeated units and errors by method/settings group. Human corrections, generated examples, uploaded test fixtures and prepared-photo declarations remain distinct.
+
+The default prepared-photo report remains pending until qualifying evidence is entered. Controlled synthetic tests establish software behaviour, including offline entry/export; actual owner photos and field usefulness remain unverified. See the [6C implementation notes](docs/wolbachia-step-6c.md), [deferred trial checklist](docs/field-trial-checklist.md) and [blank worksheets](docs/templates/).
+
 ## 2. Wolbachia collection, evidence and ML system
 
 The focus is **operational quality assurance (QA)**: keeping observations traceable and helping people decide what to inspect. The illustrated release-container programme introduces Wolbachia-carrying mosquitoes; it is distinct from a trap intended to collect adult specimens. These diagrams explain data roles, not rearing or release instructions.
@@ -108,7 +114,7 @@ The main views are **Overview**, **Image review**, **Container QA**, **Study & r
 | Vercel and browser bead counter; explicit routing and human review | Prepared-photo error measurements and biological detection validation |
 | Container QA, study checks, real numeric fitting/evaluation and inspection workflow | Field usefulness and any new or improved model |
 | Browser records, history and CSV/JSON/report exports | Shared institutional storage, field devices and intranet deployment |
-| Network/service diagnostics, prepared offline assets, 111 automated tests plus the compiled-server check and seven offline browser scenarios | Owner-operated laptop checks and the optional Firebase/Chrome model route |
+| Network/service diagnostics, prepared offline assets, separate photo references and error reports; 121 automated tests, the compiled-server check and nine browser scenarios | Owner-operated laptop/photo/field checks and the optional Firebase/Chrome model route |
 
 Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [current workplan](docs/remaining-steps-and-goals.md).
 
