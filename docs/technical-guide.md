@@ -19,6 +19,9 @@ Public demo: https://workshop-ready-theta.vercel.app/ (no evaluator login). The 
 | Trends & modelling | Actual numeric model training, chronological/grouped evaluation, two baselines, confusion counts, Brier loss, conditional intervals, evidence exports and separate synthetic case context. |
 | Inspection planning | Rule-based inspection priorities, pinned QA/study inputs, editable capacity, attributed human decisions, source-change warnings and report/CSV/JSON exports. The earlier manual location demo remains collapsed below. |
 | Data & settings | CSV exports, reset of demo edits, four processing preferences, read-only capacity check and Firebase configuration form. |
+| How to use | Connected/offline walkthrough, evidence boundaries, troubleshooting and links into each workspace; included in the prepared offline app. |
+
+For a visitor without development setup, start with the [live How to use view](https://workshop-ready-theta.vercel.app/#guide) or [portable user walkthrough](user-walkthrough.md). The Overview entry and navigation both open the guide. Its image links select **Your image tests** so a previous visit to the separate fixture tab cannot turn the computed exercise into a predefined estimate. See [6E verification](wolbachia-step-6e.md).
 
 Use **Image review → Load eight-bead example → Count this image** to count actual pixels of a clearly generated image. Its construction reference is not passed to the counter. Choose **This device only** for a worker run with no upload, or **Vercel only** to verify the hosted function. Each result retains settings, reduced-pixel SHA-256, marked regions, source and elapsed time. This classical CV baseline has no learned weights and is not a validated larvae detector.
 

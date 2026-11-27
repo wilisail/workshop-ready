@@ -7,6 +7,7 @@ import BeadSample from './components/BeadSample.tsx';
 import PhotoWorkspace from './components/PhotoWorkspace.tsx';
 import NetworkStatus from './components/NetworkStatus.tsx';
 import OfflinePreparation from './components/OfflinePreparation.tsx';
+import UserGuide from './components/UserGuide.tsx';
 import { COUNTER_MODES, readImageEngine, saveImageEngine } from './lib/counter-routing.ts';
 import type { ImageEngine } from './lib/counter-routing.ts';
 import ContainerQA from './components/ContainerQA.tsx';
@@ -26,6 +27,7 @@ const NAV: { id: View; name: string; icon: IconName }[] = [
   { id: 'studies', name: 'Study & review', icon: 'flask' },
   { id: 'trends', name: 'Trends & modelling', icon: 'chart' }, { id: 'planning', name: 'Inspection planning', icon: 'pin' },
   { id: 'settings', name: 'Data & settings', icon: 'settings' },
+  { id: 'guide', name: 'How to use', icon: 'info' },
 ];
 const TITLES: Record<View, [string, string]> = {
   overview: ['Field overview', 'Release-container observations, review queues and reported case trends.'],
@@ -35,6 +37,7 @@ const TITLES: Record<View, [string, string]> = {
   trends: ['Trends & modelling', 'Explore observed changes. Keep prediction and evidence distinct.'],
   planning: ['Inspection planning', 'Review evidence-linked suggestions and record accountable follow-up decisions.'],
   settings: ['Data & settings', 'Manage this demonstration workspace and your processing preferences.'],
+  guide: ['How to use', 'Try a connected count, prepare for offline use, and keep observations ready for human review.'],
 };
 const STATUS: Record<ReviewStatus, string> = { pending: 'To review', reviewed: 'Reviewed', rejected: 'Rejected' };
 function Badge({ status }: { status: ReviewStatus }) { return <span className={'badge badge-' + status}>{status === 'reviewed' && <Icon name="check" size={13}/>} {STATUS[status]}</span>; }
@@ -143,6 +146,7 @@ export default function App() {
   }
   function overview() {
     return <>
+      <section className="guide-entry"><div><strong>New to this workspace?</strong><p>Follow the connected and offline walkthrough. No Firebase setup is needed.</p></div><a className="button secondary" href="#guide">Read the walkthrough</a></section>
       <div className="metric-grid">
         <article className="metric"><div><span>Locations in view</span><Icon name="pin" size={18}/></div><strong>{locations.length.toString().padStart(2,'0')}</strong><p>Fictional release locations</p></article>
         <article className="metric"><div><span>Container observations</span><Icon name="layers" size={18}/></div><strong>{observations.length}</strong><p>{reviewed.length} reviewed · {observations.filter(o => o.status === 'rejected').length} rejected</p></article>
@@ -192,8 +196,8 @@ export default function App() {
     <nav className="workspace-tabs" aria-label="Workspace views">{NAV.map(item => <a key={item.id} href={'#'+item.id} className={'workspace-tab '+(view === item.id ? 'active' : '')} aria-current={view === item.id ? 'page' : undefined} onClick={() => setMobileNav(false)}><Icon name={item.icon} size={16}/>{item.name}</a>)}</nav>
     <main id="main-content" className="main-content" tabIndex={-1}><div className="demo-banner"><span className="demo-label"><Icon name="flask" size={15}/>{view === 'containers' || view === 'studies' || view === 'trends' || view === 'planning' ? 'RECORD PROVENANCE' : 'PROTOTYPE DATA'}</span><p>{view === 'planning' ? 'Inspection plans retain their selected evidence origin and source revisions. Suggestions require human review; model scores and case charts do not rank the queue.' : view === 'containers' ? 'QA records carry their own origin labels. Synthetic examples, bead proxies and user-entered field observations remain distinct.' : view === 'trends' ? 'Models use the selected study snapshot’s declared origin. Case charts remain separate synthetic context.' : view === 'studies' ? 'Studies retain declared data origins, dated plan versions and input snapshots. Review labels are entered by the operator.' : 'Case records and locations are synthetic. Image tests distinguish uploaded photos, generated proxies and computed results.'}</p><button onClick={() => navigate('settings')}>About the data</button></div>{saveFailed && <p className="storage-warning" role="alert">Browser storage is unavailable. Changes last only in this open tab; export records before leaving.</p>}
       <div className="page-heading"><div><span className="eyebrow">WOLBACHIA OPERATIONS · PROTOTYPE</span><h1>{TITLES[view][0]}</h1><p>{TITLES[view][1]}</p></div><div className="heading-actions">{view === 'overview' || (view === 'review' && imageTab === 'samples') ? <DownloadButton onClick={exportObservations}>Export sample data</DownloadButton> : null}{view !== 'containers' && view !== 'studies' && view !== 'trends' && view !== 'planning' && <button className="button primary" onClick={() => navigate(view === 'settings' ? 'overview' : 'settings')}>{view === 'settings' ? 'Back to overview' : 'Processing settings'}</button>}</div></div>
-      {view !== 'settings' && view !== 'trends' && view !== 'planning' && view !== 'containers' && view !== 'studies' && !(view === 'review' && imageTab === 'photos') && filterBar()}
-      <div className="page-body">{view === 'overview' ? overview() : view === 'review' ? reviewView() : view === 'containers' ? <ContainerQA onNotice={setToast}/> : view === 'studies' ? <StudyWorkspace onNotice={setToast} initialStudyId={studyFocusId}/> : view === 'trends' ? trends() : view === 'planning' ? <><InspectionWorkspace onNotice={setToast}/><details className="legacy-planning"><summary>Earlier manual location demo</summary><div className="legacy-planning-body">{legacyPlanning()}</div></details></> : dataSettings()}</div>
+      {view !== 'guide' && view !== 'settings' && view !== 'trends' && view !== 'planning' && view !== 'containers' && view !== 'studies' && !(view === 'review' && imageTab === 'photos') && filterBar()}
+      <div className="page-body">{view === 'guide' ? <UserGuide onOpen={next=>{if(next==='review')setImageTab('photos');navigate(next);}}/> : view === 'overview' ? overview() : view === 'review' ? reviewView() : view === 'containers' ? <ContainerQA onNotice={setToast}/> : view === 'studies' ? <StudyWorkspace onNotice={setToast} initialStudyId={studyFocusId}/> : view === 'trends' ? trends() : view === 'planning' ? <><InspectionWorkspace onNotice={setToast}/><details className="legacy-planning"><summary>Earlier manual location demo</summary><div className="legacy-planning-body">{legacyPlanning()}</div></details></> : dataSettings()}</div>
       <footer className="workspace-footer"><span><Icon name={saveFailed ? 'info' : 'check'} size={14}/>{saveFailed ? 'Changes are temporary in this tab' : 'Preferences saved on this browser'}</span><span>Independent prototype · no field deployment</span></footer>
     </main></div>
     {toast && <div className="toast" role="status"><Icon name="check" size={18}/><span>{toast}</span><button className="icon-button" onClick={() => setToast('')} aria-label="Dismiss notification"><Icon name="close" size={16}/></button></div>}

@@ -281,3 +281,35 @@ td>strong { color: #30476b; }
 .validation-content .button-row { flex-wrap: wrap; }
 .validation-inventory { margin: 16px 0; }
 @media (max-width: 600px) { .reference-grid { grid-template-columns: minmax(0,1fr); } }
+.guide-entry { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 16px 18px; margin-bottom: 20px; border: 1px solid #b4b8ca; background: #f5f6fb; color: #343864; }
+.guide-entry p { margin: 6px 0 0; font-size: .875rem; line-height: 1.6; }
+.guide-entry .button { flex-shrink: 0; }
+.user-guide { max-width: 980px; min-width: 0; color: #343864; }
+.guide-intro,.guide-step,.guide-help { padding: 20px 22px; }
+.user-guide h2 { font-size: 1.125rem; line-height: 1.5; margin: 0 0 12px; }
+.user-guide p,.user-guide li,.guide-goals { font-size: .9375rem; line-height: 1.75; }
+.user-guide p { margin: 10px 0 16px; }
+.user-guide .button { font-size: .875rem; min-height: 42px; white-space: normal; text-align: center; }
+.guide-goals { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin: 18px 0; border: 1px solid #c4c7d3; }
+.guide-goals>div { padding: 12px; }
+.guide-goals>div+div { border-left: 1px solid #c4c7d3; }
+.guide-goals dt { font-weight: 700; }
+.guide-goals dd { margin: 5px 0 0; }
+.guide-steps { list-style: none; padding: 0; margin: 18px 0; display: grid; gap: 18px; }
+.guide-steps>li { min-width: 0; }
+.guide-step-label { display: block; font-size: .75rem; letter-spacing: .04em; margin-bottom: 8px; color: #50566d; font-weight: 700; }
+.guide-step ol { padding-left: 22px; margin: 12px 0; }
+.guide-step ol>li { margin: 10px 0; padding-left: 3px; }
+.guide-links { display: flex; gap: 10px; flex-wrap: wrap; }
+.guide-help details { border-top: 1px solid #c4c7d3; padding: 12px 0; }
+.guide-help summary { cursor: pointer; line-height: 1.6; font-weight: 600; font-size: .9375rem; padding: 4px 0; }
+.guide-help details p { margin-bottom: 4px; }
+.guide-boundary { border-top: 1px solid #c4c7d3; padding-top: 16px; }
+.user-guide :focus-visible,.guide-entry a:focus-visible { outline: 3px solid #65529b; outline-offset: 4px; }
+@media (max-width: 600px) {
+  .guide-entry { flex-direction: column; align-items: stretch; gap: 12px; padding: 14px; }
+  .guide-intro,.guide-step,.guide-help { padding: 16px; }
+  .guide-goals { grid-template-columns: minmax(0,1fr); }
+  .guide-goals>div+div { border-left: 0; border-top: 1px solid #c4c7d3; }
+  .guide-links { flex-direction: column; }
+}

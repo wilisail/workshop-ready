@@ -2,7 +2,7 @@
 
 A research prototype for **release-container checks, reviewable observations and inspection planning**. This front page explains the network stack and the public-health data system before introducing the application.
 
-[Open the live dashboard](https://workshop-ready-theta.vercel.app/) · [Technical guide and setup](docs/technical-guide.md) · [Three goals and current workplan](docs/remaining-steps-and-goals.md) · [MIT licence](LICENSE)
+[Open the live dashboard](https://workshop-ready-theta.vercel.app/) · [User walkthrough](docs/user-walkthrough.md) · [Technical guide and setup](docs/technical-guide.md) · [Three goals and current workplan](docs/remaining-steps-and-goals.md) · [MIT licence](LICENSE)
 
 **Delivery goals:** network visibility, a practical public-health collection/review trial, and cloud-first processing with local fallback. Firebase is an optional connector point. Owner-operated laptop/photo checks are scheduled after implementation. See the [remaining steps, owners and hours](docs/remaining-steps-and-goals.md).
 
@@ -109,7 +109,9 @@ The proposed contribution is a traceable review-and-evaluation workflow around o
 
 **[Open Wolbachia Field Review](https://workshop-ready-theta.vercel.app/)** — no evaluator login required for the current demo.
 
-The main views are **Overview**, **Image review**, **Container QA**, **Study & review**, **Trends & modelling**, **Inspection planning**, and **Data & settings**. A beginner-friendly, end-to-end user walkthrough will be added later. For now this section presents the main page; developers can use the existing [technical guide](docs/technical-guide.md).
+The main views are **Overview**, **Image review**, **Container QA**, **Study & review**, **Trends & modelling**, **Inspection planning**, **Data & settings**, and **How to use**.
+
+Start with **[How to use](https://workshop-ready-theta.vercel.app/#guide)** or **Read the walkthrough** on Overview. The six-step guide covers a connected count, human review, preparation/offline reopening, separate photo references, QA/study/inspection records and an optional numeric-model exercise. It remains available offline after preparation and links into the relevant workspaces. A [portable Markdown walkthrough](docs/user-walkthrough.md) includes the same instructions and troubleshooting. Owner laptop, real-photo/field and clarity checks remain deferred; see [6E implementation and evidence](docs/wolbachia-step-6e.md).
 
 ### Current release and deployment status
 
@@ -118,7 +120,7 @@ The main views are **Overview**, **Image review**, **Container QA**, **Study & r
 | Vercel and browser bead counter; explicit routing and human review | Prepared-photo error measurements and biological detection validation |
 | Container QA, study checks, real numeric fitting/evaluation and inspection workflow | Field usefulness and any new or improved model |
 | Browser records, history and CSV/JSON/report exports | Shared institutional storage, field devices and intranet deployment |
-| Network/service diagnostics, prepared offline assets, separate photo references and error reports; optional Firebase connector reviewed; 121 automated tests, compiled-server check and ten browser scenarios | Owner-operated laptop/photo/field checks and live verification of the optional Firebase/Chrome model route |
+| Network/service diagnostics, prepared offline assets, separate photo references and error reports; optional Firebase connector reviewed; connected/offline walkthrough; 121 automated tests, compiled-server check and eleven browser scenarios | Owner-operated laptop/photo/field/clarity checks and live verification of the optional Firebase/Chrome model route |
 
 Firebase AI Logic and App Check adapter code remains separate and unverified. A working Vercel CV counter does not establish Firebase contest eligibility. The repository currently retains its existing visibility. See [setup and limitations](docs/technical-guide.md), [counter implementation](docs/vercel-counter.md) and the [current workplan](docs/remaining-steps-and-goals.md).
 

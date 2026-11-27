@@ -24,10 +24,10 @@ Times below estimate active work, not a promise of elapsed time. They are the re
 | 6B | Prepare assets locally; verify reopening, counting, record saving, human review and export while disconnected; cloud-first fallback must be observable | 2–3 h estimate; implementation finished | 20–30 min, disconnected-device check | Complete: 111 automated tests, seven offline browser scenarios and CI passed; live preparation verified; owner check deferred |
 | 6C | Prepared real bead photos with independent counts; error/missingness report; practical public-health data-entry/review trial with available observations | 1–1.5 h estimate; preparation implemented | 30–60 min, photos/reference counts and workflow trial | Reference/history/error reporting and blank trial pack live; 121 automated tests, nine browser scenarios and CI passed; real-photo/field evidence deferred |
 | 6D | Preserve and document the optional Firebase connector as inactive/unverified; no live Firebase demonstration | 15–30 min estimate; review finished | None | Complete: labels/docs live; 121 automated tests, ten browser scenarios and CI passed; live connector shown inactive and unconfigured |
-| 6E | Finish an accessible connected/offline walkthrough; align README, UI and evidence limitations with verified behaviour | 0.5–1 h | 10–15 min, clarity check | Pending |
+| 6E | Finish an accessible connected/offline walkthrough; align README, UI and evidence limitations with verified behaviour | 0.5–1 h estimate; implemented | 10–15 min, clarity check | Guide view and Markdown ready; 121 automated tests and eleven browser scenarios checked locally; owner clarity check deferred |
 | 7 | End-to-end QA, evaluator access, demo sequence, narration and submission text | 1–1.5 h | 30–45 min, record/upload/submit | Pending |
 
-Original estimate before 6A/6B implementation: approximately **7–11 combined working hours**. Remaining after 6A–6C preparation and the 6D review: about **1.5–2.5 hours of implementer work plus 2–3 hours of owner checks**, or **3.5–5.5 combined working hours**. New defects and upload/collection delays may add time. Completed work is not charged again.
+Original estimate before 6A/6B implementation: approximately **7–11 combined working hours**. Remaining after the 6A–6E software/preparation work: about **1–1.5 hours of implementer work plus 2–3 hours of owner checks**, or **3–4.5 combined working hours**. New defects and upload/collection delays may add time. Completed work is not charged again.
 
 ## Existing evidence and limits
 
@@ -38,6 +38,7 @@ Original estimate before 6A/6B implementation: approximately **7–11 combined w
 - Step 6B verifies complete cached assets and passes seven browser scenarios, including two full browser restarts around offline counting, review and export. Owner-operated laptop confirmation remains deferred; see [6B evidence](wolbachia-step-6b.md).
 - Step 6C adds separate reference history and scoped error reporting, with 121 automated tests and nine browser scenarios passing locally and in CI. Production preparation saved 10/10 assets; the live report correctly excludes generated examples and leaves photo-error measurements pending. Real-photo and field evidence remain deferred; see [6C evidence](wolbachia-step-6c.md).
 - Step 6D retains the optional Firebase adapter with explicit inactive/unverified labels and a controlled browser check observing zero provider requests during navigation, configuration saving, selection and a small-counter run. All 121 automated tests and ten browser scenarios passed in CI; the public settings page shows the inactive/unconfigured connector. No live Firebase integration is verified; see [6D evidence](wolbachia-step-6d.md).
+- Step 6E adds a connected/offline How to use view and matching Markdown instructions. Controlled keyboard/mobile navigation, cached guide reopening, a fresh offline count, human review/export and workspace links are checked. Owner clarity and field checks remain deferred; see [6E evidence](wolbachia-step-6e.md).
 - Photos/results use browser IndexedDB; other workspace records use browser storage. Supabase, shared multi-device records, automatic synchronisation, remote sensors and intranet deployment are not connected by this plan.
 - The synthetic prediction result (60% versus a 70% constant baseline) demonstrates computation and evaluation, not useful field prediction.
 
@@ -45,7 +46,7 @@ Original estimate before 6A/6B implementation: approximately **7–11 combined w
 
 1. Completed: push this plan and implement/check 6A; owner-operated laptop confirmation remains deferred.
 2. Completed: implement, check and release 6B without waiting for owner-operated checks; successful CI and live deployment evidence are in the step notes.
-3. 6C inputs, reference/reporting workflow and trial pack are tested and live; owner evidence remains deferred. The optional connector review in 6D is complete and live; next independent work is the 6E walkthrough.
+3. 6C inputs, reference/reporting workflow and trial pack are tested and live; owner evidence remains deferred. The 6D optional connector review is complete and live; the 6E walkthrough is implemented and checked. Next independent work is the step 7 demo/submission preparation.
 4. Run owner-operated checks as one later block; keep any missing evidence visibly pending.
 5. Finish step 7 using only results actually demonstrated.
 
@@ -58,3 +59,4 @@ Original estimate before 6A/6B implementation: approximately **7–11 combined w
 
 - Photo validation and deferred practical trial: [step 6C notes](wolbachia-step-6c.md) and [owner checklist](field-trial-checklist.md).
 - Optional inactive Firebase connector: [step 6D review](wolbachia-step-6d.md).
+- Connected/offline walkthrough: [user guide](user-walkthrough.md) and [step 6E evidence](wolbachia-step-6e.md).
