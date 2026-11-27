@@ -2,7 +2,7 @@
 
 Updated: 27 November 2026 (WIB).
 
-**Implementation and preparation are ready. Actual prepared-photo measurements and the public-health field trial remain deferred to the owner block.** No field accuracy, biological detection, infection or dengue-impact result is claimed.
+**Implementation and preparation are tested, pushed to main and live. Actual prepared-photo measurements and the public-health field trial remain deferred to the owner block.** No field accuracy, biological detection, infection or dengue-impact result is claimed.
 
 The [three main goals](remaining-steps-and-goals.md) remain network visibility, a practical public-health workflow, and cloud-first processing with a local fallback. This step connects available software to the evidence that will be collected later. Firebase remains an optional connector.
 
@@ -47,4 +47,10 @@ The fixtures exercise the software, not field accuracy. No owner photos or field
 
 ## Release evidence
 
-CI and public deployment checks are recorded here after release. Wili's 30–60 minute collection/trial block remains deferred, along with the earlier laptop checks.
+- Source release: [`ee55f7bf430a51159da12bd28885a00ca188fb8c`](https://github.com/wilisail/workshop-ready/commit/ee55f7bf430a51159da12bd28885a00ca188fb8c).
+- [GitHub CI run 45921240870](https://github.com/wilisail/workshop-ready/actions/runs/45921240870) passed the 121 automated tests, compiled Node API smoke check, production build and nine Chromium browser scenarios.
+- Vercel production deployment `dpl_AtBMbeXmNcN1VZUt9HqYV4SZPpsb` reached **READY** for that source commit. The public [Image review page](https://workshop-ready-theta.vercel.app/#review) was opened and checked on 27 November 2026 (WIB).
+- The deployed page reports offline build `0877b3523b8b`. Connected preparation confirmed **10/10 assets saved** for that release in the verification browser. Full disconnected behaviour is covered by the controlled browser suite; this preparation check does not establish offline behaviour on Wili's laptop.
+- The live workspace retained two older generated examples, excluded both from prepared-photo validation, and displayed **Photo-error measurements pending** with zero complete pairs. The separate-reference panel explains that generated examples retain construction references. No real photograph or field observation was created during this live check.
+
+Software preparation and controlled synthetic rehearsals are verified. Wili's **30–60 minute collection/trial block remains deferred**, along with the earlier laptop checks. Real-photo accuracy, actual field usefulness and owner feedback remain pending.
